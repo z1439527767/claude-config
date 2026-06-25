@@ -21,7 +21,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-safety.ps1\"",
-            "timeout": 5
+            "timeout": 2
           }
         ]
       }
@@ -54,7 +54,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
-            "timeout": 3
+            "timeout": 2
           }
         ]
       }
@@ -101,7 +101,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-sediment.ps1\"",
-            "timeout": 5
+            "timeout": 2
           },
           {
             "type": "prompt",
@@ -217,7 +217,10 @@
     },
     "ra-mcp": {
       "command": "rust-analyzer-mcp",
-      "args": ["--workspace", "."]
+      "args": [
+        "--workspace",
+        "."
+      ]
     },
     "kadabra": {
       "command": "kadabra-runes"
@@ -227,9 +230,11 @@
     },
     "gortex": {
       "command": "gortex",
-      "args": ["serve", "--mcp"]
+      "args": [
+        "serve",
+        "--mcp"
+      ]
     }
   },
   "skipDangerousModePermissionPrompt": true
 }
-
