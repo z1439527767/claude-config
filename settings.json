@@ -100,7 +100,7 @@
           },
           {
             "type": "prompt",
-            "prompt": "Review this session. Did Claude: (1) complete the user's task? (2) verify changes with external evidence (tests, exit codes, file content)? (3) update CLAUDE.local.md if learnings occurred? Return 'approve' if all yes, or 'block' explaining what's missing.",
+            "prompt": "Gate check. For EACH claim Claude made about completed work, demand machine-verifiable evidence: (1) code changes → syntax check passed? exit code 0? (2) file edits → was content verified after write? (3) task completion → what external signal proves it's done? No evidence = no pass. Self-reported 'done' without proof fails this gate. Return 'approve' only if concrete evidence exists for all claims, or 'block' listing claims without evidence.",
             "timeout": 10
           },
           {
@@ -200,6 +200,6 @@
       "url": "http://localhost:3001/sse"
     }
   },
-  "skipDangerousModePermissionPrompt": true 
+  "skipDangerousModePermissionPrompt": true
 }
 
