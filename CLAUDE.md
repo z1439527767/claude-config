@@ -43,7 +43,15 @@
 ## 7. 改行为只改这三个文件
 settings.json、CLAUDE.md、AGENTS.md。用户纠正同一问题两次 → 立即写入对应文件。不让同一个错犯第三次。
 
-## 8. 记忆闭环：越用越聪明
+## 8. 自托管：我进化我自己
+- 配置研究默认搜 GitHub（stars > 50），再搜通用 web。社区实现 > 官方文档。
+- PreToolUse hook 必须设精确 matcher。无 matcher = 所有工具输出被污染。
+- Stop hook `{"decision":"block"}` 是 harness 原生自循环机制。和 Codex /goal、Cursor Temporal 同模式。
+- 进化门控只在实际修改时更新。观察报告不算修改。
+- 用户说"全加""全修" → 全做，不逐一确认。
+- token-guard 证明了：没 matcher 的 PreToolUse hook 是灾难。已删。
+
+## 9. 记忆闭环：越用越聪明
 
 三层记忆 + 蒸馏 + 衰减：
 - **错误** → 发生时立即记入知識圖譜，标注时间、上下文、根因
