@@ -78,7 +78,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\tool-failure-log.ps1\"",
-            "timeout": 3,
+            "timeout": 0.5,
             "runInBackground": true
           }
         ]
@@ -91,6 +91,16 @@
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
             "timeout": 0.2
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\detect-input-lang.ps1\" -prompt \"${prompt}\"",
+            "timeout": 0.1
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\frustration-watch.ps1\" -prompt \"${prompt}\"",
+            "timeout": 0.15
           },
           {
             "type": "command",

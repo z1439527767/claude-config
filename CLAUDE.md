@@ -8,34 +8,38 @@
 
 ## 2. 行为约束
 - 不叫用户做事。
-- 不碰 settings.json/CLAUDE.md/AGENTS.md 以外的文件。
+- 配置改 settings.json/CLAUDE.md/AGENTS.md，项目代码改对应项目文件。
 - 同错两次 → 立即写规则。
-- **不许过度自作主张。只做明确要求的改动，不"顺便优化"周围代码。**
 - **不许过度抽象。单一用途不需要接口/基类/工厂。能一行不写三行。**
+- **语言检测已内置**：UserPromptSubmit hook 自动检测用户输入语言。遇到语言模糊的输入时主动调 detect-lang.py / guess-lang.py / scan-project.py。
 
-## 3. 验证 & 思考
+## 3. 执行规则（每次行动前过一遍）
+@.claude/rules/tools.md        — 工具选择：专用优先，能并行不串行
+@.claude/rules/parallel.md     — 并行规则：互不依赖 = 同一轮发出
+@.claude/rules/errors.md       — 错误处理：查记忆→查代码→修根因，同错两次停
+@.claude/rules/code-change.md  — 代码修改：读过再改，改过必验，改一处查全部引用
+@.claude/rules/git.md          — Git 操作：不 force 默认分支，不 skip hooks
+@.claude/rules/self-review.md  — 自审查：改完过 4 问，没说"已自审" = 没做完
+@.claude/rules/communication.md — 通信：用户语言回复，不输出纯计划，不叫用户做事
+
+## 4. 学习与研究
+@.claude/rules/research.md     — 研究 SOP：搜→选→装→测→存，不等用户确认
+
+## 5. 沉淀与交接
+@.claude/rules/persistence.md  — 沉淀规则：什么写记忆、什么写规则、什么写脚本
+@.claude/rules/session-handoff.md — 会话交接：保留层、清理层、启动检查
+
+## 6. 验证 & 思考
 @.claude/rules/verify.md
 @.claude/rules/thinking.md
 
-## 4. 学习即融合
-**每学必用。上网学到的 → 立即写入自身配置文件。不等。**
-搜索先 GitHub 再 web。Workflow > 脚本。文件即记忆：状态存文件不存上下文。
+## 7. 进化 & 自监控
+@.claude/rules/evolution.md      — 进化策略：preset → 闭环 → 验证 → 回滚
+@.claude/rules/memory-layers.md  — 五层记忆：L0 元规则 → L4 会话归档
+scripts/health-check.py          — 健康仪表板：disk/git/hooks/evo/memory/failures
+scripts/sense-signals.py         — 挫败感知：检测用户重复/简短/命令式/纠正信号
+scripts/safe-cmd.ps1             — 命令安全：allowlist + 注入检测
 
-## 5. 不重复造轮子
-改前先查：现有机制能不能直接用？复用 > 新建。
-
-## 5.5. 上下文工程（Agent TARS 多级记忆）
-- L0 永久：CLAUDE.md / AGENTS.md / settings.json → 永不压缩
-- L1 运行：handoff.md / loop_state.json → 跨会话手递手
-- L2 循环：evolution_log / cycle_log → 每轮覆盖
-- L3 即时：hook_perf / temp state → 自动清理
-**每层独立，上层不污染下层。上下文是预算，不是背包。**
-
-## 6. 关键模式
-- PreToolUse hook 必须精确 matcher。无 matcher = 全局噪音。
-- Stop hook `{"decision":"block"}` = 原生自循环。
-- 进化门控只在实际修改时更新，观察不算修改。
-
-## 7. 记忆 & 协作
+## 8. 记忆
 @.claude/rules/memory.md
 @AGENTS.md
