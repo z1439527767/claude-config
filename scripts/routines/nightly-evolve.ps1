@@ -8,7 +8,7 @@ $summaryDir = "$env:USERPROFILE\.claude\.claude\session_history"
 
 # 1. Run memory scoring (Ebbinghaus decay)
 Write-Output "[nightly] Running memory-score..."
-$result = & pwsh -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\scripts\hooks\memory-score.ps1" 2>&1
+$result = & pwsh -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\scripts\hooks\memory-score.ps1" -RecordAccess:$false 2>&1
 Write-Output $result
 
 # 2. Check for decay candidates

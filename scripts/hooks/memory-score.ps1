@@ -3,7 +3,8 @@
 # Or called from other hooks: & pwsh -File "...memory-score.ps1"
 param(
     [string]$MemoryDir = "$env:USERPROFILE\.claude\projects\C--Users-z1439--claude\memory",
-    [string]$StateFile = "$env:USERPROFILE\.claude\.claude\memory_scores.json"
+    [string]$StateFile = "$env:USERPROFILE\.claude\.claude\memory_scores.json",
+    [switch]$RecordAccess = $true
 )
 
 $ErrorActionPreference = "Continue"
@@ -59,8 +60,10 @@ foreach ($entry in $entries) {
         $state[$entry.id] = @{ access_count = 0; last_access = $null; applied_successfully = $false }
     }
     $es = $state[$entry.id]
-    $es.access_count = [int]$es.access_count + 1
-    $es.last_access = $now.ToString("yyyy-MM-dd")
+    if ($RecordAccess) {
+        $es.access_count = [int]$es.access_count + 1
+        $es.last_access = $now.ToString("yyyy-MM-dd")
+    }
 
     $createdDt = if ($created) { try { [datetime]::ParseExact($created, "yyyy-MM-dd", $null) } catch { $now } } else { $now }
     $lastAccessDt = if ($es.last_access) { try { [datetime]::ParseExact($es.last_access, "yyyy-MM-dd", $null) } catch { $createdDt } } else { $createdDt }

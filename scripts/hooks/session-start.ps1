@@ -79,7 +79,7 @@ $totalScripts = (Get-ChildItem $scriptsDir -Recurse -Filter "*.ps1" -ErrorAction
 # ═══════════════════════════════════════════
 # PHASE 2: Ebbinghaus memory scoring (delegated to shared module)
 # ═══════════════════════════════════════════
-& pwsh -NoProfile -ExecutionPolicy Bypass -File "$baseDir\scripts\hooks\memory-score.ps1" 2>&1 | Out-Null
+& pwsh -NoProfile -ExecutionPolicy Bypass -File "$baseDir\scripts\hooks\memory-score.ps1" -RecordAccess:$false 2>&1 | Out-Null
 
 # ═══════════════════════════════════════════
 # PHASE 3: Inject CLAUDE.local.md context
