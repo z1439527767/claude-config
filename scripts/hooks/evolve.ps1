@@ -388,31 +388,6 @@ $unused | ForEach-Object {
 }
 
 # ═══════════════════════════════════════
-# MEMORY DISTILLATION (L4)
-# ═══════════════════════════════════════
-if (Test-Path $memDir) {
-    $memIndex = Join-Path $memDir "MEMORY.md"
-    if (Test-Path $memIndex) {
-        $memContent = Get-Content $memIndex -Raw -Encoding UTF8
-
-        # Count memories by tag — only on memory entries (skip legend lines)
-        $entryLines = ($memContent -split "`n" | Where-Object { $_ -match '^- \[' })
-        $entryContent = $entryLines -join "`n"
-        $freshCount = ([regex]::Matches($entryContent, '\[fresh\]')).Count
-        $agingCount = ([regex]::Matches($entryContent, '\[aging\]')).Count
-        $staleCount = ([regex]::Matches($entryContent, '\[stale\]')).Count
-        $expiredCount = ([regex]::Matches($entryContent, '\[expired\]')).Count
-
-        if ($expiredCount -gt 0) {
-            $changes += "L4: $expiredCount 条记忆已过期，建议清理"
-        }
-        if ($staleCount -gt 3) {
-            $changes += "L4: $staleCount 条记忆将过期，建议蒸馏"
-        }
-    }
-}
-
-# ═══════════════════════════════════════
 # EVOLUTION VERIFICATION + AUTO-ROLLBACK
 # ═══════════════════════════════════════
 if ($applied.Count -gt 0) {
