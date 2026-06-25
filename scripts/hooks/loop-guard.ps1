@@ -17,7 +17,7 @@ if (Test-Path $haltFile) { _p 0; exit 0 }
 $cooldownMin = 0
 if (Test-Path $cooldownFile) {
     $lastCycle = try { [datetime](Get-Content $cooldownFile -Raw) } catch { [datetime]::MinValue }
-    if (((Get-Date) - $lastCycle).TotalMinutes -lt $cooldownMin) { exit 0 }
+    if (((Get-Date) - $lastCycle).TotalMinutes -lt $cooldownMin) { _p 0; exit 0 }
 }
 (Get-Date -Format "o") | Set-Content $cooldownFile
 
@@ -46,7 +46,7 @@ $state | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 
 if ($shouldStop) {
     Remove-Item $stateFile -Force -ErrorAction SilentlyContinue
-    exit 0
+    _p 0; exit 0
 }
 
 # BLOCK — inject current task as next turn
