@@ -70,8 +70,10 @@ try {
     $report | ConvertTo-Json -Compress | Set-Content $reportFile -Encoding UTF8
 
     # Log to history
-    $report | ConvertTo-Json -Compress | Add-Content $historyFile -Encoding UTF8
-    try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert frustration_history "" ($report | ConvertTo-Json -Compress) 2>$null | Out-Null } catch {}
+    $reportJson = $report | ConvertTo-Json -Compress
+    try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert frustration_history "" $reportJson 2>$null | Out-Null } catch {
+        $reportJson | Add-Content $historyFile -Encoding UTF8
+    }
 
     if ($level -ne 'normal') {
         Write-Output "frustration_level=$level score=$score"

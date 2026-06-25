@@ -17,8 +17,9 @@ $entry = @{
     agent_id    = $agentId.Substring(0, [Math]::Min(16, $agentId.Length))
 } | ConvertTo-Json -Compress
 
-Add-Content "$logDir\subagent_spawns.jsonl" -Value $entry -Encoding UTF8
-try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert subagent_spawns "" $entry 2>$null | Out-Null } catch {}
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert subagent_spawns "" $entry 2>$null | Out-Null } catch {
+    Add-Content "$logDir\subagent_spawns.jsonl" -Value $entry -Encoding UTF8
+}
 
 # Keep only last 50
 $lines = Get-Content "$logDir\subagent_spawns.jsonl" -Encoding UTF8 -ErrorAction SilentlyContinue

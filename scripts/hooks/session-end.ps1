@@ -117,8 +117,9 @@ $qualityScore = [math]::Max(0, [math]::Min(100, $qualityScore))
 $trendFile = "$summaryDir\quality_trend.jsonl"
 $trendJson = @{ timestamp = (Get-Date -Format "o"); score = $qualityScore; friction = $frictionCount; failures = $failureCount; evolved = $evolved; sedimentation = $localMdUpdated } |
     ConvertTo-Json -Compress
-$trendJson | Add-Content $trendFile -Encoding UTF8
-try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert quality_trend "" $trendJson 2>$null | Out-Null } catch {}
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert quality_trend "" $trendJson 2>$null | Out-Null } catch {
+    $trendJson | Add-Content $trendFile -Encoding UTF8
+}
 
 # Keep last 20 summaries
 Get-ChildItem $summaryDir -File -Filter "session_*.json" -ErrorAction SilentlyContinue |

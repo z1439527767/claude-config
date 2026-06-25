@@ -23,8 +23,9 @@ $entry = @{
     error      = if ($errorMsg -and $errorMsg.Length -gt 1000) { $errorMsg.Substring(0, 1000) + "…" } else { $errorMsg }
 } | ConvertTo-Json -Compress
 
-Add-Content "$logDir\failures.jsonl" -Value $entry -Encoding UTF8
-try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert tool_failures "" $entry 2>$null | Out-Null } catch {}
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert tool_failures "" $entry 2>$null | Out-Null } catch {
+    Add-Content "$logDir\failures.jsonl" -Value $entry -Encoding UTF8
+}
 
 # Keep last 100 entries
 $lines = @(Get-Content "$logDir\failures.jsonl" -Encoding UTF8 -ErrorAction SilentlyContinue)
