@@ -158,7 +158,17 @@
   },
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "csharp-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "php-lsp@claude-plugins-official": true,
+    "ruby-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "kotlin-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -204,6 +214,20 @@
     "tabby": {
       "type": "sse",
       "url": "http://localhost:3001/sse"
+    },
+    "ra-mcp": {
+      "command": "rust-analyzer-mcp",
+      "args": ["--workspace", "."]
+    },
+    "kadabra": {
+      "command": "kadabra-runes"
+    },
+    "clast": {
+      "command": "clast-ai"
+    },
+    "gortex": {
+      "command": "gortex",
+      "args": ["serve", "--mcp"]
     }
   },
   "skipDangerousModePermissionPrompt": true
