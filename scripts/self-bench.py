@@ -180,6 +180,44 @@ def bench_friction():
         return {"pass": False, "score": 0.0, "detail": str(e)[:100]}
 
 
+@bench("rag-retrieval", "Hybrid RAG retrieval finds relevant docs for known queries", weight=1.0)
+def bench_rag_retrieval():
+    eval_script = HOME / "scripts" / "rag-evaluate.py"
+    if not eval_script.exists():
+        return {"pass": False, "score": 0.0, "detail": "rag-evaluate.py missing"}
+    try:
+        r = subprocess.run(["python", str(eval_script), "--json"],
+                         capture_output=True, text=True, timeout=30,
+                         encoding="utf-8", errors="replace", cwd=str(HOME))
+        data = json.loads(r.stdout)
+        best = data.get("best", {})
+        if best and best.get("combined_score", 0) >= 0.5:
+            return {"pass": True, "score": best["combined_score"],
+                    "detail": f"Best: {best.get('name','?')} ({best['combined_score']:.2f})"}
+        return {"pass": False, "score": best.get("combined_score", 0),
+                "detail": f"Best retriever only {best.get('combined_score',0):.2f}"}
+    except Exception as e:
+        return {"pass": False, "score": 0.0, "detail": str(e)[:100]}
+
+
+@bench("rag-rewrite", "Query rewriter generates valid variant phrasings", weight=0.5)
+def bench_rag_rewrite():
+    rewrite_script = HOME / "scripts" / "rag-rewrite.py"
+    if not rewrite_script.exists():
+        return {"pass": False, "score": 0.0, "detail": "rag-rewrite.py missing"}
+    try:
+        r = subprocess.run(["python", str(rewrite_script), "--json", "修复进化系统的错误"],
+                         capture_output=True, text=True, timeout=10,
+                         encoding="utf-8", errors="replace", cwd=str(HOME))
+        data = json.loads(r.stdout)
+        count = data.get("count", 0)
+        if count >= 3:
+            return {"pass": True, "score": 1.0, "detail": f"{count} variants generated"}
+        return {"pass": True, "score": 0.7, "detail": f"Only {count} variants"}
+    except Exception as e:
+        return {"pass": False, "score": 0.0, "detail": str(e)[:100]}
+
+
 # ═══════════════════════════════════════════
 # Runner
 # ═══════════════════════════════════════════
