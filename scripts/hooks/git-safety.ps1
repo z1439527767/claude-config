@@ -21,6 +21,14 @@ if ($toolInput) {
         Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: --no-verify blocked. Run hooks properly." } }'
         exit 2
     }
+    if ($toolInput -match '--no-gpg-sign\b') {
+        Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: --no-gpg-sign blocked. Sign commits properly." } }'
+        exit 2
+    }
+    if ($toolInput -match '-c\s+commit\.gpgsign\s*=\s*false') {
+        Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: -c commit.gpgsign=false blocked. Sign commits properly." } }'
+        exit 2
+    }
     if ($toolInput -match '--force\s+(origin/)?(main|master)') {
         Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: force push to main/master blocked." } }'
         exit 2

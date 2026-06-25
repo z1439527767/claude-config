@@ -21,7 +21,7 @@ if (Test-Path $cooldownFile) {
 (Get-Date -Format "o") | Set-Content $cooldownFile
 
 # Load state
-$state = @{ iteration = 0; max_iterations = 500; last_score = 0; streak = 0 }
+$state = @{ iteration = 0; last_score = 0; streak = 0 }
 if (Test-Path $stateFile) {
     try { $loaded = Get-Content $stateFile -Raw | ConvertFrom-Json
         $state.iteration = [int]$loaded.iteration; $state.last_score = [int]$loaded.last_score; $state.streak = [int]$loaded.streak
@@ -36,10 +36,10 @@ if (Test-Path $taskFile) {
     if ($customTask) { $task = $customTask }
 }
 
-# Stop conditions
+# Stop conditions — ONLY HALT file or critical failure. Agent decides, not hardcoded numbers.
 $shouldStop = $false
-if ($state.iteration -ge $state.max_iterations) { $shouldStop = $true }
-if ($state.streak -ge 200 -and $state.last_score -ge 98) { $shouldStop = $true }
+# Agent can create ESCALATE.md to request review, but loop continues
+if (Test-Path $haltFile) { $shouldStop = $true }
 
 $state | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 
