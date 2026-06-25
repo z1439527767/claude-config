@@ -64,8 +64,10 @@ if ($settingsModified) {
     }
     # Log
     $evolveLog = "$env:USERPROFILE\.claude\.claude\evolution_log.jsonl"
-    @{ timestamp = (Get-Date -Format "o"); type = "quick-evolution"; changes = @("L3-quick: $($tuned -join ', ')") } |
-        ConvertTo-Json -Compress | Add-Content $evolveLog -Encoding UTF8
+    $evoJson = @{ timestamp = (Get-Date -Format "o"); type = "quick-evolution"; changes = @("L3-quick: $($tuned -join ', ')") } |
+        ConvertTo-Json -Compress
+    $evoJson | Add-Content $evolveLog -Encoding UTF8
+    try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert evolution_log "" $evoJson 2>$null | Out-Null } catch {}
 }
 
 # Update gate

@@ -16,6 +16,8 @@ Watches:
 import sys, json, os, io, time, hashlib, subprocess
 from pathlib import Path
 from datetime import datetime
+try: from db import write_log
+except ImportError: write_log = lambda s,k,d: None
 
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -101,6 +103,8 @@ def log_event(event_type, target, detail=""):
     EVENT_LOG.parent.mkdir(parents=True, exist_ok=True)
     with open(EVENT_LOG, 'a', encoding='utf-8') as f:
         f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    try: write_log("watchdog_events", None, entry)
+    except Exception: pass
 
 def run_action(action, target_label):
     """Run the appropriate action for a changed target."""

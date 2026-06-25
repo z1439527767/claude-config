@@ -57,6 +57,7 @@ try {
             $snapshotDir = Split-Path $snapshotLog -Parent
             if (-not (Test-Path $snapshotDir)) { New-Item -ItemType Directory -Force $snapshotDir | Out-Null }
             $entry | ConvertTo-Json -Compress | Add-Content $snapshotLog -Encoding UTF8
+            try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert snapshot_log "" $entry 2>$null | Out-Null } catch {}
         }
     }
 } catch {

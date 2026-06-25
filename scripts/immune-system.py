@@ -19,6 +19,8 @@ import sys, json, os, io, re, hashlib
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
+try: from db import write_log
+except ImportError: write_log = lambda s,k,d: None
 
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -175,6 +177,8 @@ def log_threat(threat_type, detail, severity="medium", handled=True):
     }
     with open(THREAT_LOG, 'a', encoding='utf-8') as f:
         f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    try: write_log("threat_log", None, entry)
+    except Exception: pass
 
 
 # ═══════════════════════════════════════════

@@ -52,6 +52,7 @@ $event = @{
 
 $logFile = Join-Path $frictionDir "events.jsonl"
 Add-Content -Path $logFile -Value $event -Encoding UTF8
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert "friction/events" "" $event 2>$null | Out-Null } catch {}
 
 # ── Count recent events ──
 $recent = Get-Content $logFile -Tail 30 -ErrorAction SilentlyContinue |

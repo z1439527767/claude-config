@@ -20,6 +20,8 @@ Unsafe (requires --commit):
 import sys, json, os, io, re, subprocess, time
 from pathlib import Path
 from datetime import datetime
+try: from db import write_log
+except ImportError: write_log = lambda s,k,d: None
 
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -41,6 +43,8 @@ def log_heal(action, target, result, detail=""):
     HEAL_LOG.parent.mkdir(parents=True, exist_ok=True)
     with open(HEAL_LOG, 'a', encoding='utf-8') as f:
         f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    try: write_log("auto_heal", None, entry)
+    except Exception: pass
 
 def run_verify():
     """Run verify-all and return parsed results."""

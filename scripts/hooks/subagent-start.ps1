@@ -18,6 +18,7 @@ $entry = @{
 } | ConvertTo-Json -Compress
 
 Add-Content "$logDir\subagent_spawns.jsonl" -Value $entry -Encoding UTF8
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert subagent_spawns "" $entry 2>$null | Out-Null } catch {}
 
 # Keep only last 50
 $lines = Get-Content "$logDir\subagent_spawns.jsonl" -Encoding UTF8 -ErrorAction SilentlyContinue

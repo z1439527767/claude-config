@@ -22,6 +22,7 @@ $logDir = "$env:USERPROFILE\.claude\.claude\notifications"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force $logDir | Out-Null }
 $entry = @{ timestamp = (Get-Date -Format "o"); type = $notificationType; message = $message } | ConvertTo-Json -Compress
 Add-Content "$logDir\notifications.jsonl" -Value $entry -Encoding UTF8
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert notifications "" $entry 2>$null | Out-Null } catch {}
 
 # ── Windows toast (Win10+ only, no extra modules) ──
 try {

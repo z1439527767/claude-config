@@ -6,8 +6,14 @@ if (-not $perfHookName) { $perfHookName = "unknown" }
 $perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
 if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | Out-Null }
 if (-not $sw) { $sw = [Diagnostics.Stopwatch]::StartNew() }
+$script:DbAdapter = "$env:USERPROFILE\.claude\scripts\adapter-db.py"
+
 function Write-PerfLog { param([int]$ExitCode=0, [string]$Extra="")
-  @{t=(Get-Date -Format "o");h=$perfHookName;d=$sw.ElapsedMilliseconds;e=$ExitCode}|ConvertTo-Json -Compress|Add-Content "$perfDir\$perfHookName.jsonl" -Encoding UTF8 }
+  $json = @{t=(Get-Date -Format "o");h=$perfHookName;d=$sw.ElapsedMilliseconds;e=$ExitCode} | ConvertTo-Json -Compress
+  $json | Add-Content "$perfDir\$perfHookName.jsonl" -Encoding UTF8
+  # Dual-write to SQLite (non-fatal on failure)
+  try { python3 $script:DbAdapter insert hook_perf $perfHookName $json 2>$null | Out-Null } catch {}
+}
 
 function Get-HookPerfMetrics {
   <#
