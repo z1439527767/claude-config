@@ -19,7 +19,7 @@ $LAUNCHER_LOG = "$CORE_PATH\.claude\launcher_log.json"
 
 # ═══ API ═══
 $env:ANTHROPIC_BASE_URL            = "https://api.deepseek.com/anthropic"
-$env:ANTHROPIC_AUTH_TOKEN          = "sk-b395615ed9424e178a1a1c9ef3499310"
+$env:ANTHROPIC_AUTH_TOKEN          = if ($env:DEEPSEEK_API_KEY) { $env:DEEPSEEK_API_KEY } else { Write-Error "DEEPSEEK_API_KEY not set. Run: `$env:DEEPSEEK_API_KEY='your-key'" }
 $env:ANTHROPIC_MODEL               = "deepseek-v4-pro"
 $env:ANTHROPIC_DEFAULT_OPUS_MODEL   = "deepseek-v4-pro"
 $env:ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-pro"

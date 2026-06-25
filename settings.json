@@ -1,9 +1,5 @@
 {
-  "model": {
-    "opus": "deepseek-v4-pro",
-    "sonnet": "deepseek-v4-pro",
-    "haiku": "deepseek-v4-flash"
-  },
+  "model": "deepseek-v4-pro",
   "lsp": {
     "enabled": ["pyright", "typescript"],
     "disabled": ["rust-analyzer", "gopls", "jdtls", "csharp-lsp", "clangd", "php-lsp", "ruby-lsp", "swift-lsp", "kotlin-lsp", "lua-lsp"]

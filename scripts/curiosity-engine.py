@@ -131,7 +131,7 @@ def detect_knowledge_blindspots():
     """Identify areas where the system has no knowledge coverage."""
     blindspots = []
 
-    # Map current knowledge domains
+    # Map current knowledge domains from BOTH memory and rules
     covered_domains = set()
     if MEMORY_DIR.exists():
         for mf in MEMORY_DIR.rglob("*.md"):
@@ -144,6 +144,18 @@ def detect_knowledge_blindspots():
                     covered_domains.add(domain_match.group(1))
             except Exception:
                 pass
+
+    # ALSO scan rules directory — each .md file covers its stem as a domain
+    # Normalize: map rule stems to likely domain names
+    STEM_TO_DOMAIN = {
+        'tools': 'tool-use', 'verify': 'verification', 'parallel': 'parallelism',
+        'research': 'learning', 'errors': 'error-handling', 'context': 'context-management',
+        'self-review': 'verification', 'memory': 'memory', 'memory-layers': 'memory',
+    }
+    if RULES_DIR.exists():
+        for rf in RULES_DIR.glob("*.md"):
+            domain = STEM_TO_DOMAIN.get(rf.stem, rf.stem)
+            covered_domains.add(domain)
 
     # Domains an AI agent SHOULD know about
     desired_domains = {
