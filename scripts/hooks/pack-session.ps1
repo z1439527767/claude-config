@@ -11,4 +11,7 @@ if ($LASTEXITCODE -eq 0 -and $summary) {
 # Also rebuild the pack index
 python3 "$env:USERPROFILE\.claude\scripts\packed-retrieve.py" --index 2>$null | Set-Content "$env:USERPROFILE\.claude\packed\INDEX.md" -Encoding UTF8
 
+# Sync to Obsidian vault
+python3 "$env:USERPROFILE\.claude\scripts\obsidian-sync.py" push 2>$null
+
 exit 0
