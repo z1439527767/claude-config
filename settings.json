@@ -57,7 +57,8 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-verify.ps1\" -tool_name \"${tool_name}\" -tool_input '${tool_input}'",
-            "timeout": 10
+            "timeout": 10,
+            "runInBackground": true
           }
         ]
       }
@@ -68,7 +69,8 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\tool-failure-log.ps1\"",
-            "timeout": 3
+            "timeout": 3,
+            "runInBackground": true
           }
         ]
       }
