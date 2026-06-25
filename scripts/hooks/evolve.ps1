@@ -300,12 +300,14 @@ if ($claudeContent -and $agentsContent) {
 # 5c: Error pattern learning from tool_failures (deduped — skip if same as last report)
 $failureDir = "$env:USERPROFILE\.claude\.claude\tool_failures"
 if (Test-Path $failureDir) {
-    # Load last evo changes for dedup
-    $lastChanges = @()
+    # Load last 5 evo entries for dedup (wider window avoids re-reporting)
+    $recentChanges = @()
     if (Test-Path $evolveLog) {
         try {
-            $lastLine = Get-Content $evolveLog -Tail 1 -Encoding UTF8 -ErrorAction SilentlyContinue
-            if ($lastLine) { $lastEntry = $lastLine | ConvertFrom-Json; $lastChanges = @($lastEntry.changes) }
+            $lastLines = Get-Content $evolveLog -Tail 5 -Encoding UTF8 -ErrorAction SilentlyContinue
+            foreach ($ll in $lastLines) {
+                if ($ll) { try { $entry = $ll | ConvertFrom-Json; $recentChanges += @($entry.changes) } catch { } }
+            }
         } catch { }
     }
 
