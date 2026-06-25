@@ -7,10 +7,11 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
+$perfHookName = "memory-score"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 $memIndex = Join-Path $MemoryDir "MEMORY.md"
-if (-not (Test-Path $memIndex)) { Write-Output "memory-score: MEMORY.md not found at $memIndex"; return }
+if (-not (Test-Path $memIndex)) { Write-Output "memory-score: MEMORY.md not found at $memIndex"; _p 0; return }
 
 $state = @{}
 if (Test-Path $StateFile) {
@@ -44,7 +45,7 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
     }
 }
 
-if ($entries.Count -eq 0) { Write-Output "memory-score: no entries found"; return }
+if ($entries.Count -eq 0) { Write-Output "memory-score: no entries found"; _p 0; return }
 
 $now = Get-Date
 foreach ($entry in $entries) {
@@ -126,4 +127,5 @@ Tags: [fresh] >= 0.8 / [aging] >= 0.5 / [stale] >= 0.3 / [expired] under 0.3
 '@
 Set-Content $memIndex -Value $newContent -Encoding UTF8
 
+_p 0
 Write-Output "memory-score: $($entries.Count) entries scored"

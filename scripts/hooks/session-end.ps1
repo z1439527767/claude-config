@@ -2,6 +2,7 @@
 param()
 
 $ErrorActionPreference = "Continue"
+$perfHookName = "session-end"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 $summaryDir = "$env:USERPROFILE\.claude\.claude\session_history"
@@ -112,4 +113,4 @@ foreach ($p in $tmpPatterns) {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
-exit 0
+_p 0; exit 0

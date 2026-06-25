@@ -260,13 +260,14 @@ foreach ($eventName in $settings.hooks.PSObject.Properties.Name) {
         }
     }
 }
-# Also check cross-script references (e.g. learn-online.ps1 called by loop-guard.ps1)
+# Also check cross-script references (e.g. memory-score.ps1 called by session-start.ps1)
 foreach ($sn in $allScripts) {
     if ($referencedScripts[$sn]) { continue }
     $pat = [regex]::Escape($sn)
     foreach ($other in $allScripts) {
         if ($other -eq $sn) { continue }
-        if ((Get-Content (Join-Path $scriptsDir5a $other) -Raw -ErrorAction SilentlyContinue) -match $pat) {
+        $otherContent = Get-Content (Join-Path $scriptsDir5a $other) -Raw -ErrorAction SilentlyContinue
+        if ($otherContent -match "(?i)$pat") {
             $referencedScripts[$sn] = $true
             break
         }

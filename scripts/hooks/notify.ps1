@@ -1,6 +1,7 @@
 # notify.ps1 — Notification hook: desktop notification + log
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "notify"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 # ── Read notification context from stdin ──
 $message = $null
@@ -52,4 +53,4 @@ try {
     # Toast failed — already logged to file, that's fine
 }
 
-exit 0
+_p 0; exit 0

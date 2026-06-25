@@ -2,6 +2,7 @@
 param()
 
 $ErrorActionPreference = "Continue"
+$perfHookName = "subagent-stop"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 # The hook receives subagent info via environment or stdin
@@ -35,4 +36,4 @@ if ($recentCount -ge 10) {
     }
 }
 
-exit 0
+_p 0; exit 0

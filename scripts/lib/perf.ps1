@@ -1,17 +1,10 @@
-# perf.ps1 — shared performance-logging utility
-# Set $perfHookName before dot-sourcing, then call _p($exitCode) at exit points.
-# Usage:
-#   $perfHookName = "my-hook"
-#   . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
+# Shared performance tracking module — used by all hook scripts
+# Auto-created by L5 proactive optimization
+param()
+$ErrorActionPreference = "Continue"
 if (-not $perfHookName) { $perfHookName = "unknown" }
-$perfSw = [Diagnostics.Stopwatch]::StartNew()
-function _p($c) {
-    $d = "$env:USERPROFILE\.claude\.claude\hook_perf"
-    if (-not (Test-Path $d)) { mkdir -Force $d | Out-Null }
-    @{
-        t = (Get-Date -Format "o")
-        h = $perfHookName
-        d = $perfSw.ElapsedMilliseconds
-        e = $c
-    } | ConvertTo-Json -Compress | Add-Content "$d\$perfHookName.jsonl" -Encoding UTF8
-}
+$perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
+if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | Out-Null }
+if (-not $sw) { $sw = [Diagnostics.Stopwatch]::StartNew() }
+function Write-PerfLog { param([int]$ExitCode=0, [string]$Extra="")
+  @{t=(Get-Date -Format "o");h=$perfHookName;d=$sw.ElapsedMilliseconds;e=$ExitCode}|ConvertTo-Json -Compress|Add-Content "$perfDir\$perfHookName.jsonl" -Encoding UTF8 }

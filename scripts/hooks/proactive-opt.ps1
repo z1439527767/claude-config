@@ -2,6 +2,7 @@
 # Scans: script sizes, duplication, complexity, stale config
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "proactive-opt"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $base = "$env:USERPROFILE\.claude"
 $scriptsDir = "$base\scripts\hooks"
@@ -86,4 +87,4 @@ if ($suggestions.Count -gt 0) {
     Write-Output "PROACTIVE:`n$msg"
 }
 
-exit 0
+_p 0; exit 0

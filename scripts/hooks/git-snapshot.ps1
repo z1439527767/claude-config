@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
+$perfHookName = "git-snapshot"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 $claudeDir = "$env:USERPROFILE\.claude"
@@ -64,4 +65,4 @@ try {
 
 try { Pop-Location } catch { }
 
-exit 0
+_p 0; exit 0

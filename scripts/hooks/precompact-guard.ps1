@@ -1,5 +1,6 @@
 # precompact-guard.ps1 — PreCompact: preserve core rules + smart compression hint
 param()
+$perfHookName = "precompact-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 $guard = @"
 POST-COMPACT RULES STILL ACTIVE:
 1. No verification = not done. External evidence only.
@@ -15,4 +16,4 @@ Session context was compacted. Core constraints survive.
 "@
 Write-Output $guard
 $guard | Set-Content "$env:USERPROFILE\.claude\.claude\post_compact_guard.txt" -Encoding UTF8
-exit 0
+_p 0; exit 0

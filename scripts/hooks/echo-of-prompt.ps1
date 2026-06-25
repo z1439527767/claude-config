@@ -4,6 +4,7 @@ param(
     [string]$prompt = ""
 )
 $ErrorActionPreference = "Continue"
+$perfHookName = "echo-of-prompt"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $taskFile = "$env:USERPROFILE\.claude\.claude\task-context.md"
 $stateFile = "$env:USERPROFILE\.claude\.claude\echo_state.json"

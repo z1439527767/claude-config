@@ -1,6 +1,7 @@
 # subagent-start.ps1 — SubagentStart: log spawn events
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "subagent-start"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $logDir = "$env:USERPROFILE\.claude\.claude\subagent_logs"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force $logDir | Out-Null }
@@ -22,4 +23,4 @@ Add-Content "$logDir\subagent_spawns.jsonl" -Value $entry -Encoding UTF8
 $lines = Get-Content "$logDir\subagent_spawns.jsonl" -Encoding UTF8 -ErrorAction SilentlyContinue
 if ($lines.Count -gt 50) { $lines[-50..-1] | Set-Content "$logDir\subagent_spawns.jsonl" -Encoding UTF8 }
 
-exit 0
+_p 0; exit 0

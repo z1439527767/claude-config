@@ -2,10 +2,11 @@
 # Pattern from 60-hook framework + community best practice
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "read-before-edit"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $toolName = $env:CLAUDE_TOOL_NAME
 $toolInput = $env:CLAUDE_TOOL_INPUT
-if ($toolName -notin @("Edit", "Write")) { exit 0 }
+if ($toolName -notin @("Edit", "Write")) { _p 0; exit 0 }
 
 # Extract file path
 $filePath = $null
@@ -13,7 +14,7 @@ try {
     $parsed = $toolInput | ConvertFrom-Json
     $filePath = $parsed.file_path
 } catch {}
-if (-not $filePath) { exit 0 }
+if (-not $filePath) { _p 0; exit 0 }
 
 # Track recently read files
 $trackFile = "$env:USERPROFILE\.claude\.claude\recently_read.json"
@@ -35,9 +36,9 @@ $normalized = $filePath.Replace('\', '/').ToLower()
 
 if (-not $recentlyRead[$normalized]) {
     Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "READ-BEFORE-EDIT: File not read recently. Read it first before editing." } }'
-    exit 0
+    _p 0; exit 0
 }
 
 # Save updated tracker
 $recentlyRead | ConvertTo-Json | Set-Content $trackFile -Encoding UTF8
-exit 0
+_p 0; exit 0

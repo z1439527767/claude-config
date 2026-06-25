@@ -4,6 +4,7 @@ param(
 )
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
+$perfHookName = "friction-detect"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 if (-not $prompt) { exit 0 }
 

@@ -1,6 +1,7 @@
 # tool-failure-log.ps1 — PostToolUseFailure: log + pattern detection + recovery suggestions
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "tool-failure-log"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $logDir = "$env:USERPROFILE\.claude\.claude\tool_failures"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force $logDir | Out-Null }
@@ -11,7 +12,7 @@ $errorMsg = $env:CLAUDE_TOOL_ERROR
 
 # Skip PostToolUseFailure noise — harness fires this for internal operations
 # where no tool metadata is available. Real failures always have either toolName or errorMsg.
-if ((-not $toolName) -and (-not $errorMsg)) { exit 0 }
+if ((-not $toolName) -and (-not $errorMsg)) { _p 0; exit 0 }
 if (-not $toolName) { $toolName = "unknown" }
 
 # Log the failure
@@ -63,4 +64,4 @@ if ($recentFailures.Count -ge 3) {
     }
 }
 
-exit 0
+_p 0; exit 0

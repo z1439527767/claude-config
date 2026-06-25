@@ -1,6 +1,7 @@
 # auto-distill.ps1 — SessionStart: distill 3+ same-topic memories into principles
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "auto-distill"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $memDir = "$env:USERPROFILE\.claude\projects\C--Users-z1439--claude\memory"
 $memIndex = Join-Path $memDir "MEMORY.md"

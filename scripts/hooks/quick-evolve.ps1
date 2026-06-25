@@ -2,6 +2,7 @@
 # Runs in background, exits fast if nothing to tune
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "quick-evolve"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 # Gate: minimum 30min between quick evolutions
 $gateFile = "$env:USERPROFILE\.claude\.claude\quick_evo_gate.json"

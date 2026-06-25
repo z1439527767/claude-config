@@ -2,6 +2,7 @@
 # Works for ANY task, not just self-evolution. Reads task from file.
 param()
 $ErrorActionPreference = "Continue"
+$perfHookName = "loop-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $stateFile = "$env:USERPROFILE\.claude\.claude\loop_state.json"
 $taskFile = "$env:USERPROFILE\.claude\.claude\active_task.md"
@@ -10,7 +11,7 @@ $cooldownFile = "$env:USERPROFILE\.claude\.claude\loop_cooldown"
 $defaultTask = "AUTONOMOUS: 1) Search web for new Claude Code patterns. Apply any findings to CLAUDE.md/AGENTS.md/settings.json immediately. 2) Run evolve.ps1 + auto-distill.ps1. 3) Verify syntax+JSON+refs. 4) Fix issues. 5) Update handoff.md. 6) Schedule next wakeup."
 
 # HALT overrides everything
-if (Test-Path $haltFile) { exit 0 }
+if (Test-Path $haltFile) { _p 0; exit 0 }
 
 # Cooldown: only block every 2min
 $cooldownMin = 0
