@@ -8,7 +8,13 @@
     "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
     "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
     "CLAUDE_AUTOCOMPACT_PCT": "70",
-    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16000"
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16000",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+    "CLAUDE_CODE_RESUME_INTERRUPTED_TURN": "1",
+    "CLAUDE_CODE_GLOB_HIDDEN": "false",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
+    "MAX_THINKING_TOKENS": "16000",
+    "CLAUDE_CODE_ARTIFACT_AUTO_OPEN": "0"
   },
   "permissions": {
     "defaultMode": "bypassPermissions"
@@ -21,7 +27,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-safety.ps1\"",
-            "timeout": 2
+            "timeout": 1
           }
         ]
       }
@@ -36,14 +42,15 @@
             "timeout": 10
           }
         ]
-      },
+      }
+    ],
+    "PostToolUseFailure": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\nudge.ps1\"",
-            "timeout": 3,
-            "runInBackground": true
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\tool-failure-log.ps1\"",
+            "timeout": 3
           }
         ]
       }
@@ -54,6 +61,11 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
+            "timeout": 1
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\echo-of-prompt.ps1\" -prompt \"${prompt}\"",
             "timeout": 2
           }
         ]
@@ -64,23 +76,24 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\verify-scripts-syntax.ps1\"",
-            "timeout": 5
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-distill.ps1\"",
+            "timeout": 4
           },
           {
             "type": "command",
-            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-inject.ps1\"",
-            "timeout": 3
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\proactive-opt.ps1\"",
+            "timeout": 5,
+            "runInBackground": true
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\session-start.ps1\"",
+            "timeout": 10
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
             "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-score.ps1\"",
-            "timeout": 3
           }
         ]
       }
@@ -94,15 +107,10 @@
             "timeout": 2
           },
           {
-            "type": "prompt",
-            "prompt": "Gate check. For EACH claim Claude made about completed work, demand machine-verifiable evidence: (1) code changes → syntax check passed? exit code 0? (2) file edits → was content verified after write? (3) task completion → what external signal proves it's done? No evidence = no pass. Self-reported 'done' without proof fails this gate. Return 'approve' only if concrete evidence exists for all claims, or 'block' listing claims without evidence.",
-            "timeout": 10
-          },
-          {
-            "type": "agent",
-            "model": "haiku",
-            "prompt": "You are an independent adversarial reviewer. Use a different reasoning approach than Claude — you are NOT the same model. Review ALL changes made in this session. Find: (1) bugs or logic errors, (2) missing edge cases, (3) unverified claims — things Claude said 'done' but didn't prove with external evidence (exit codes, file content, test output), (4) missed related files that should have been changed. Be skeptical. Don't trust Claude's self-assessment. If nothing wrong, say 'PASS'. If issues found, list them with file paths.",
-            "timeout": 30
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\quick-evolve.ps1\"",
+            "timeout": 5,
+            "runInBackground": true
           }
         ]
       }
@@ -144,21 +152,44 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\notify.ps1\"",
+            "timeout": 5,
+            "runInBackground": true
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-start.ps1\"",
+            "timeout": 3
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "gopls-lsp@claude-plugins-official": true,
-    "jdtls-lsp@claude-plugins-official": true,
-    "csharp-lsp@claude-plugins-official": true,
-    "clangd-lsp@claude-plugins-official": true,
-    "php-lsp@claude-plugins-official": true,
-    "ruby-lsp@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "kotlin-lsp@claude-plugins-official": true,
-    "lua-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "gopls-lsp@claude-plugins-official": false,
+    "jdtls-lsp@claude-plugins-official": false,
+    "csharp-lsp@claude-plugins-official": false,
+    "clangd-lsp@claude-plugins-official": false,
+    "php-lsp@claude-plugins-official": false,
+    "ruby-lsp@claude-plugins-official": false,
+    "swift-lsp@claude-plugins-official": false,
+    "kotlin-lsp@claude-plugins-official": false,
+    "lua-lsp@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -204,16 +235,6 @@
     "tabby": {
       "type": "sse",
       "url": "http://localhost:3001/sse"
-    },
-    "ra-mcp": {
-      "command": "rust-analyzer-mcp",
-      "args": [
-        "--workspace",
-        "."
-      ]
-    },
-    "kadabra": {
-      "command": "kadabra-runes"
     },
     "clast": {
       "command": "clast-ai"
