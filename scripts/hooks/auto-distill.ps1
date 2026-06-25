@@ -10,7 +10,7 @@ $distillState = "$env:USERPROFILE\.claude\.claude\distill_state.json"
 if (-not (Test-Path $memIndex)) { exit 0 }
 
 # Parse MEMORY.md entries
-$lines = Get-Content $memIndex -Raw -Encoding UTF8 -split "`n"
+$lines = (Get-Content $memIndex -Raw -Encoding UTF8) -split "`n"
 $entries = @()
 for ($i = 0; $i -lt $lines.Count; $i++) {
     if ($lines[$i] -match '^- \[(\S+)\]\(([^)]+)\) — (.+?)\s\[.+?\]$') {

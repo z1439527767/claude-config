@@ -19,7 +19,7 @@ if (-not $filePath -or -not (Test-Path $filePath)) { exit 0 }
 
     # Stage 0: Integrity check (file exists, not empty, not truncated)
     $fileSize = (Get-Item $filePath).Length
-    if ($fileSize -eq 0) { Write-Output "[escalate] $filePath: empty file (0 bytes)"; exit 2 }
+    if ($fileSize -eq 0) { Write-Output "[escalate] ${filePath}: empty file (0 bytes)"; exit 2 }
     if ($tool_input) {
         try {
             $parsed = $tool_input | ConvertFrom-Json
@@ -27,7 +27,7 @@ if (-not $filePath -or -not (Test-Path $filePath)) { exit 0 }
             if ($provided -and $provided.Length -gt 100) {
                 $actual = Get-Content $filePath -Raw -Encoding UTF8
                 if ($actual -and $actual.Length -lt ($provided.Length * 0.5)) {
-                    Write-Output "[escalate] $filePath: truncation ($($actual.Length) of $($provided.Length) chars)"
+                    Write-Output "[escalate] ${filePath}: truncation ($($actual.Length) of $($provided.Length) chars)"
                     exit 2
                 }
             }

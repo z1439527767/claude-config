@@ -104,7 +104,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-sediment.ps1\"",
-            "timeout": 2
+            "timeout": 1
           },
           {
             "type": "command",
