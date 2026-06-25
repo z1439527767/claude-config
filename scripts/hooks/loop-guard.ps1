@@ -13,7 +13,7 @@ $defaultTask = "AUTONOMOUS: 1) Search web for new Claude Code patterns. Apply an
 if (Test-Path $haltFile) { exit 0 }
 
 # Cooldown: only block every 2min
-$cooldownMin = 2
+$cooldownMin = 0
 if (Test-Path $cooldownFile) {
     $lastCycle = try { [datetime](Get-Content $cooldownFile -Raw) } catch { [datetime]::MinValue }
     if (((Get-Date) - $lastCycle).TotalMinutes -lt $cooldownMin) { exit 0 }
@@ -39,7 +39,7 @@ if (Test-Path $taskFile) {
 # Stop conditions
 $shouldStop = $false
 if ($state.iteration -ge $state.max_iterations) { $shouldStop = $true }
-if ($state.streak -ge 5 -and $state.last_score -ge 95) { $shouldStop = $true }
+if ($state.streak -ge 200 -and $state.last_score -ge 98) { $shouldStop = $true }
 
 $state | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 
