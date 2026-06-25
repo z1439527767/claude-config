@@ -8,7 +8,7 @@ if (-not $prompt -or $prompt.Length -lt 3) { exit 0 }
 $markerFile = "$env:USERPROFILE\.claude\session-env\user-lang.txt"
 
 try {
-    $result = $prompt | & python3 "$env:USERPROFILE\.claude\scripts\detect-lang.py" 2>$null
+    $result = & python3 "$env:USERPROFILE\.claude\scripts\detect-lang.py" $prompt 2>$null
     if ($LASTEXITCODE -eq 0 -and $result) {
         $lang = $result.Trim()
         if ($lang -and $lang -ne 'und') {
