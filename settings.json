@@ -68,6 +68,12 @@
           {
             "type": "command",
             "command": "node \"C:\\\\Users\\\\z1439\\\\AppData\\\\Local\\\\npm-cache\\\\_npx\\\\98c9e994b942979e\\\\node_modules\\\\@houtini\\\\metacog\\\\src\\\\hook.js\""
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\rogue-detector.ps1\"",
+            "timeout": 0.2,
+            "runInBackground": true
           }
         ]
       }
