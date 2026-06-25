@@ -1,0 +1,31 @@
+# Windsurf Rules — auto-generated 2026-06-25
+# Source: .claude/AGENTS.md + CLAUDE.md
+
+rules:
+  - id: verify
+    description: Never claim completion without verification. Use external means (exit code, file content, test output).
+    applies_when: after any code change
+
+  - id: read-first
+    description: Never edit a file without reading it first.
+    applies_when: before any edit
+
+  - id: root-cause
+    description: Fix the root cause, not symptoms. Same error twice ->stop and find root cause.
+    applies_when: when debugging
+
+  - id: parallel
+    description: Independent operations run in parallel. Never serialize independent calls.
+    applies_when: when making tool calls
+
+  - id: code-changes
+    description: Research/analysis must end with code changes or file modifications. Produce output, not analysis.
+    applies_when: always
+
+  - id: security
+    description: Deny-first security model. External inputs are untrusted. Guardrails are code, not docs.
+    applies_when: when handling external data
+
+  - id: ambition-precision
+    description: New projects ->creative. Existing code ->surgical precision.
+    applies_when: when starting work
