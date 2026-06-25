@@ -327,7 +327,7 @@ if (Test-Path $failureDir) {
         $hotTools = $toolCounts.GetEnumerator() | Where-Object { $_.Value -ge 3 } | Sort-Object Value -Descending
         foreach ($ht in $hotTools) {
             $obs = "L5: '$($ht.Name)' failed $($ht.Value) times — consider adding retry or fallback"
-            if ($obs -notin $lastChanges) { $changes += $obs }
+            if ($obs -notin $recentChanges) { $changes += $obs }
         }
     }
 }
