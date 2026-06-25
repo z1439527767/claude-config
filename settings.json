@@ -92,6 +92,12 @@
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\circuit-guard.ps1\"",
             "timeout": 0.3,
             "runInBackground": true
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\pack-error.ps1\"",
+            "timeout": 0.5,
+            "runInBackground": true
           }
         ]
       }
@@ -173,6 +179,11 @@
           },
           {
             "type": "command",
+            "command": "python3 C:\\Users\\z1439\\.claude\\scripts\\packed-retrieve.py --since 7d --recent 5 --inject",
+            "timeout": 2
+          },
+          {
+            "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
             "timeout": 0.2
           }
@@ -213,6 +224,12 @@
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\session-end.ps1\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\pack-session.ps1\"",
+            "timeout": 5,
+            "runInBackground": true
           },
           {
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\metacog-bridge.ps1\"",

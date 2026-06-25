@@ -225,6 +225,7 @@ def pack(text, ptype=None, source="stdin"):
 
     # Replace template variables
     body = tinfo["template"].format(
+        title=title,
         source=meta["source"],
         body=text.strip(),
         confidence=meta["confidence"],
@@ -247,6 +248,7 @@ def pack(text, ptype=None, source="stdin"):
     fm = f"""---
 id: {entry_id}
 type: {ptype}
+title: {title}
 created: {now.isoformat()}
 tags: {json.dumps(tags)}
 source: {source}
