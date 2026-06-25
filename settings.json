@@ -1,8 +1,22 @@
 {
   "model": "deepseek-v4-pro",
   "lsp": {
-    "enabled": ["pyright", "typescript"],
-    "disabled": ["rust-analyzer", "gopls", "jdtls", "csharp-lsp", "clangd", "php-lsp", "ruby-lsp", "swift-lsp", "kotlin-lsp", "lua-lsp"]
+    "enabled": [
+      "pyright",
+      "typescript"
+    ],
+    "disabled": [
+      "rust-analyzer",
+      "gopls",
+      "jdtls",
+      "csharp-lsp",
+      "clangd",
+      "php-lsp",
+      "ruby-lsp",
+      "swift-lsp",
+      "kotlin-lsp",
+      "lua-lsp"
+    ]
   },
   "env": {
     "ANTHROPIC_API_KEY": "",
@@ -14,7 +28,6 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
     "DEEPSEEK_API_KEY": "sk-b395615ed9424e178a1a1c9ef3499310",
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-v4-flash",
     "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
     "CLAUDE_AUTOCOMPACT_PCT": "70",
     "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16000",
@@ -35,7 +48,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-safety.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       },
@@ -45,7 +58,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\read-before-edit.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       }
@@ -68,7 +81,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\track-reads.ps1\"",
-            "timeout": 0.2,
+            "timeout": 1,
             "runInBackground": true
           }
         ]
@@ -106,7 +119,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\tool-failure-log.ps1\"",
-            "timeout": 0.5,
+            "timeout": 1,
             "runInBackground": true
           },
           {
@@ -130,7 +143,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
-            "timeout": 0.2
+            "timeout": 1
           },
           {
             "type": "command",
@@ -145,7 +158,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\echo-of-prompt.ps1\" -prompt \"${prompt}\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       },
@@ -164,23 +177,23 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-distill.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-score.ps1\" -RecordAccess:`$false",
-            "timeout": 0.3
+            "timeout": 2
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\proactive-opt.ps1\"",
-            "timeout": 5,
+            "timeout": 2,
             "runInBackground": true
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\session-start.ps1\"",
-            "timeout": 2
+            "timeout": 3
           },
           {
             "type": "command",
@@ -207,7 +220,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       }
@@ -218,18 +231,18 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-sediment.ps1\"",
-            "timeout": 0.3
+            "timeout": 1
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\quick-evolve.ps1\"",
-            "timeout": 0.2,
+            "timeout": 1,
             "runInBackground": true
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\loop-guard.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       }
@@ -240,7 +253,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-snapshot.ps1\" -Message \"session-end\"",
-            "timeout": 0.5
+            "timeout": 20
           },
           {
             "type": "command",
@@ -268,7 +281,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-stop.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       }
@@ -313,7 +326,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-start.ps1\"",
-            "timeout": 0.2
+            "timeout": 1
           }
         ]
       }
