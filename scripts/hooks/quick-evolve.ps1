@@ -4,6 +4,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "quick-evolve"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Guard: prevent infinite Stop hook re-triggers
+if ($env:STOP_HOOK_ACTIVE -eq "1") { Write-PerfLog 0; exit 0 }
+
 # Gate: minimum 30min between quick evolutions
 $gateFile = "$env:USERPROFILE\.claude\.claude\quick_evo_gate.json"
 $now = Get-Date
@@ -11,7 +14,7 @@ if (Test-Path $gateFile) {
     try {
         $gate = Get-Content $gateFile -Raw | ConvertFrom-Json
         $lastQuick = [datetime]$gate.last_quick_evo
-        if (($now - $lastQuick).TotalMinutes -lt 30) { Write-PerfLog 0; exit 0 }
+        if (($now - $lastQuick).TotalMinutes -lt 2) { Write-PerfLog 0; exit 0 }
     } catch {}
 }
 

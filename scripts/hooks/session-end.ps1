@@ -12,40 +12,40 @@ $baseDir = "$env:USERPROFILE\.claude"
 # ═══════════════════════════════════════════
 try {
     $diaryContent = "Session completed. $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
-    python3 "$baseDir\scripts\identity-journal.py" --entry "$diaryContent" 2>$null | Out-Null
+    python3 "$baseDir\scripts\identity-journal.py" --entry "$diaryContent" 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
 # PHASE 2: Subconscious — Dream Mode
 # ═══════════════════════════════════════════
 try {
-    python3 "$baseDir\scripts\subconscious.py" --mode dream 2>$null | Out-Null
+    python3 "$baseDir\scripts\subconscious.py" --mode dream 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
 # PHASE 3: Intuition — Rebuild Index
 # ═══════════════════════════════════════════
 try {
-    python3 "$baseDir\scripts\intuition-engine.py" --rebuild 2>$null | Out-Null
+    python3 "$baseDir\scripts\intuition-engine.py" --rebuild 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
 # PHASE 4: Pack Session + Sync Obsidian
 # ═══════════════════════════════════════════
 try {
-    $summary = python3 "$baseDir\scripts\session-summarizer.py" --json 2>$null
+    $summary = python3 "$baseDir\scripts\session-summarizer.py" --json 2>> "$baseDir\logs\session-errors.log"
     if ($LASTEXITCODE -eq 0 -and $summary) {
-        $summary | python3 "$baseDir\scripts\data-pack.py" --type session --source "session-summarizer" 2>$null | Out-Null
+        $summary | python3 "$baseDir\scripts\data-pack.py" --type session --source "session-summarizer" 2>> "$baseDir\logs\session-errors.log" | Out-Null
     }
 } catch {}
 
 try {
-    python3 "$baseDir\scripts\packed-retrieve.py" --index 2>$null |
+    python3 "$baseDir\scripts\packed-retrieve.py" --index 2>> "$baseDir\logs\session-errors.log" |
         Set-Content "$baseDir\packed\INDEX.md" -Encoding UTF8
 } catch {}
 
 try {
-    python3 "$baseDir\scripts\obsidian-sync.py" push 2>$null | Out-Null
+    python3 "$baseDir\scripts\obsidian-sync.py" push 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════

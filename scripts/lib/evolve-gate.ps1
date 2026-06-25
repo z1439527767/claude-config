@@ -12,9 +12,9 @@ if (Test-Path $gateFile) {
         $gate = Get-Content $gateFile -Raw | ConvertFrom-Json
         $lastEvo = [datetime]$gate.last_evolution
         $hoursSince = ($now - $lastEvo).TotalHours
-        if ($hoursSince -lt 0.083) {
+        if ($hoursSince -lt 0.033) {
             $script:canEvolve = $false
-            $script:gateReason = "距上次进化 ${hoursSince}h < 5min"
+            $script:gateReason = "距上次进化 ${hoursSince}h < 2min"
         }
         $recentEvos = ($gate.recent_evo_timestamps | ForEach-Object { [datetime]$_ }) |
             Where-Object { ($now - $_).TotalDays -lt 7 }

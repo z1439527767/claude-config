@@ -5,6 +5,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "loop-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Guard: prevent infinite Stop hook re-triggers
+if ($env:STOP_HOOK_ACTIVE -eq "1") { Write-PerfLog 0; exit 0 }
+
 $stateFile = "$env:USERPROFILE\.claude\.claude\loop_state.json"
 $taskFile = "$env:USERPROFILE\.claude\.claude\active_task.md"
 $haltFile = "$env:USERPROFILE\.claude\.claude\HALT"
