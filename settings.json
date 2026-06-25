@@ -81,16 +81,6 @@
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-score.ps1\"",
             "timeout": 3
-          },
-          {
-            "type": "agent",
-            "prompt": "Check if nudge_pending.txt exists at C:\\Users\\z1439\\.claude\\.claude\\nudge_pending.txt. If it does exist and was created within the last 30 minutes (compare its content timestamp with current time), then: (1) read the evolution log at C:\\Users\\z1439\\.claude\\.claude\\evolution_log.jsonl (last 30 entries), (2) read friction events at C:\\Users\\z1439\\.claude\\.claude\\tellonce-state\\friction\\events.jsonl (last 20 entries), (3) read success patterns from CLAUDE.local.md and the knowledge graph, (4) do a quick review identifying recurring patterns, emerging friction, or success patterns worth distilling, (5) write findings to C:\\Users\\z1439\\.claude\\.claude\\nudge_findings.json with structure { \"timestamp\": \"...\", \"patterns\": [...], \"friction\": [...], \"success_patterns\": [...], \"recommendations\": [...] }, (6) delete the nudge_pending.txt flag file. If nudge_pending.txt doesn't exist or its content is more than 30 minutes old, do nothing.",
-            "timeout": 30
-          },
-          {
-            "type": "agent",
-            "prompt": "Read the friction log at C:\\Users\\z1439\\.claude\\.claude\\tellonce-state\\friction\\events.jsonl (last 50 lines max). Also read the last_session_success.json at C:\\Users\\z1439\\.claude\\.claude\\last_session_success.json. If there are friction events, semantically understand what specific behavior the user was correcting. Then read CLAUDE.md and AGENTS.md at C:\\Users\\z1439\\.claude\\. If a specific, actionable rule can be added to prevent the exact friction pattern, Edit the file to add it. Rules must be: (1) specific to the actual friction, not generic, (2) in negative constraint format for AGENTS.md, (3) in behavioral format for CLAUDE.md. If no clear pattern or already covered by existing rules, do nothing. Don't add rules for one-off corrections. Skip if friction log is empty or has <2 events.",
-            "timeout": 30
           }
         ]
       }
