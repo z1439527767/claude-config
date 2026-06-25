@@ -113,4 +113,4 @@ foreach ($p in $tmpPatterns) {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0

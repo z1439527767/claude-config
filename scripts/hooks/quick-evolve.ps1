@@ -11,16 +11,16 @@ if (Test-Path $gateFile) {
     try {
         $gate = Get-Content $gateFile -Raw | ConvertFrom-Json
         $lastQuick = [datetime]$gate.last_quick_evo
-        if (($now - $lastQuick).TotalMinutes -lt 30) { exit 0 }
+        if (($now - $lastQuick).TotalMinutes -lt 30) { _p 0; exit 0 }
     } catch {}
 }
 
 # Quick L3: check perf data and tune timeouts
 $perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
 $settingsJson = "$env:USERPROFILE\.claude\settings.json"
-if (-not (Test-Path $perfDir)) { exit 0 }
+if (-not (Test-Path $perfDir)) { _p 0; exit 0 }
 
-try { $settings = Get-Content $settingsJson -Raw | ConvertFrom-Json } catch { exit 0 }
+try { $settings = Get-Content $settingsJson -Raw | ConvertFrom-Json } catch { _p 0; exit 0 }
 $tuned = @()
 $settingsModified = $false
 
@@ -77,4 +77,4 @@ if ($settingsModified) {
 
 # Update gate
 @{ last_quick_evo = (Get-Date -Format "o") } | ConvertTo-Json | Set-Content $gateFile -Encoding UTF8
-exit 0
+_p 0; exit 0

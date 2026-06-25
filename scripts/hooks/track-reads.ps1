@@ -4,7 +4,7 @@ $ErrorActionPreference = "Continue"
 $perfHookName = "track-reads"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $toolName = $env:CLAUDE_TOOL_NAME
-if ($toolName -ne "Read") { _p 0; exit 0 }
+if ($toolName -ne "Read") { Write-PerfLog 0; exit 0 }
 
 $trackFile = "$env:USERPROFILE\.claude\.claude\recently_read.json"
 $recentlyRead = @{}
@@ -36,4 +36,4 @@ $keys = $pruned.Keys | Select-Object -Last 20
 $final = @{}; foreach ($k in $keys) { $final[$k] = $pruned[$k] }
 
 $final | ConvertTo-Json | Set-Content $trackFile -Encoding UTF8
-_p 0; exit 0
+Write-PerfLog 0; exit 0

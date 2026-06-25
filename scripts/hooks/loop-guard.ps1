@@ -11,13 +11,13 @@ $cooldownFile = "$env:USERPROFILE\.claude\.claude\loop_cooldown"
 $defaultTask = "AUTONOMOUS: 1) Search web for new Claude Code patterns. Apply any findings to CLAUDE.md/AGENTS.md/settings.json immediately. 2) Run evolve.ps1 + auto-distill.ps1. 3) Verify syntax+JSON+refs. 4) Fix issues. 5) Update handoff.md. 6) Schedule next wakeup."
 
 # HALT overrides everything
-if (Test-Path $haltFile) { _p 0; exit 0 }
+if (Test-Path $haltFile) { Write-PerfLog 0; exit 0 }
 
 # Cooldown: only block every 2min
 $cooldownMin = 0
 if (Test-Path $cooldownFile) {
     $lastCycle = try { [datetime](Get-Content $cooldownFile -Raw) } catch { [datetime]::MinValue }
-    if (((Get-Date) - $lastCycle).TotalMinutes -lt $cooldownMin) { _p 0; exit 0 }
+    if (((Get-Date) - $lastCycle).TotalMinutes -lt $cooldownMin) { Write-PerfLog 0; exit 0 }
 }
 (Get-Date -Format "o") | Set-Content $cooldownFile
 
@@ -46,7 +46,7 @@ $state | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 
 if ($shouldStop) {
     Remove-Item $stateFile -Force -ErrorAction SilentlyContinue
-    _p 0; exit 0
+    Write-PerfLog 0; exit 0
 }
 
 # BLOCK — inject current task as next turn
@@ -55,4 +55,4 @@ $block = @{
     reason = "[LOOP #$($state.iteration)] $task"
 } | ConvertTo-Json -Compress
 Write-Output $block
-_p 0; exit 0
+Write-PerfLog 0; exit 0

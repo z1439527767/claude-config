@@ -12,7 +12,7 @@ $errorMsg = $env:CLAUDE_TOOL_ERROR
 
 # Skip PostToolUseFailure noise — harness fires this for internal operations
 # where no tool metadata is available. Real failures always have either toolName or errorMsg.
-if ((-not $toolName) -and (-not $errorMsg)) { _p 0; exit 0 }
+if ((-not $toolName) -and (-not $errorMsg)) { Write-PerfLog 0; exit 0 }
 if (-not $toolName) { $toolName = "unknown" }
 
 # Log the failure
@@ -64,4 +64,4 @@ if ($recentFailures.Count -ge 3) {
     }
 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0

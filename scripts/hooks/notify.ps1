@@ -53,4 +53,4 @@ try {
     # Toast failed — already logged to file, that's fine
 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0

@@ -36,4 +36,4 @@ if ($recentCount -ge 10) {
     }
 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0

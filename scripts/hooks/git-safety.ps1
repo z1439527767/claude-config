@@ -1,8 +1,8 @@
 # Git Safety PreToolUse Hook (Bash matcher)
 # Blocks --no-verify, --no-gpg-sign, -c commit.gpgsign=false, and force push to main/master
 $sw = [Diagnostics.Stopwatch]::StartNew()
-function _p($c) { $d="$env:USERPROFILE\.claude\.claude\hook_perf"; if(-not(Test-Path $d)){mkdir -Force $d|Out-Null}; @{t=(Get-Date -Format "o");h="git-safety";d=$sw.ElapsedMilliseconds;e=$c}|ConvertTo-Json -Compress|Add-Content "$d\git-safety.jsonl" -Encoding UTF8 }
-$cmd = $env:CLAUDE_TOOL_INPUT; if ($cmd -and $cmd -notmatch '\bgit\b') { _p 0; exit 0 }
+function Write-PerfLog($c) { $d="$env:USERPROFILE\.claude\.claude\hook_perf"; if(-not(Test-Path $d)){mkdir -Force $d|Out-Null}; @{t=(Get-Date -Format "o");h="git-safety";d=$sw.ElapsedMilliseconds;e=$c}|ConvertTo-Json -Compress|Add-Content "$d\git-safety.jsonl" -Encoding UTF8 }
+$cmd = $env:CLAUDE_TOOL_INPUT; if ($cmd -and $cmd -notmatch '\bgit\b') { Write-PerfLog 0; exit 0 }
 $toolInput = $env:CLAUDE_TOOL_INPUT
 $ErrorActionPreference = "SilentlyContinue"
 if (-not $toolInput) {
@@ -36,4 +36,4 @@ if ($toolInput) {
     }
 }
 Write-Output '{}'
-_p 0
+Write-PerfLog 0

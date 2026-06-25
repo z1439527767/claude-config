@@ -4,9 +4,9 @@ param()
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $sw = [Diagnostics.Stopwatch]::StartNew()
-function _p($c) { $d="$env:USERPROFILE\.claude\.claude\hook_perf"; if(-not(Test-Path $d)){mkdir -Force $d|Out-Null}; @{t=(Get-Date -Format "o");h="auto-sediment";d=$sw.ElapsedMilliseconds;e=$c}|ConvertTo-Json -Compress|Add-Content "$d\auto-sediment.jsonl" -Encoding UTF8 }
+function Write-PerfLog($c) { $d="$env:USERPROFILE\.claude\.claude\hook_perf"; if(-not(Test-Path $d)){mkdir -Force $d|Out-Null}; @{t=(Get-Date -Format "o");h="auto-sediment";d=$sw.ElapsedMilliseconds;e=$c}|ConvertTo-Json -Compress|Add-Content "$d\auto-sediment.jsonl" -Encoding UTF8 }
 
-if ($env:STOP_HOOK_ACTIVE -eq "1") { _p 0; exit 0 }
+if ($env:STOP_HOOK_ACTIVE -eq "1") { Write-PerfLog 0; exit 0 }
 
 $sessionMarker = "$env:USERPROFILE\.claude\.claude\session_start_time"
 $localMd = "$env:USERPROFILE\.claude\CLAUDE.local.md"
@@ -73,4 +73,4 @@ if ($frictionCount -ge 2) {
     Write-Output "WARNING: 本会话 $frictionCount 次纠正 — 建议检查是否需要更新规则"
 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0

@@ -28,19 +28,19 @@ if (-not (Test-Path $taskFile) -and $prompt -and $prompt.Length -gt 10) {
 
 if (-not (Test-Path $taskFile)) {
     @{ count = $count; last_echo = $lastEcho } | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
-    _p 0; exit 0
+    Write-PerfLog 0; exit 0
 }
 
 $taskContext = Get-Content $taskFile -Raw -Encoding UTF8
-if (-not $taskContext.Trim()) { _p 0; exit 0 }
+if (-not $taskContext.Trim()) { Write-PerfLog 0; exit 0 }
 
 # Check if time to echo
 if (($count - $lastEcho) -lt $echoInterval) {
     @{ count = $count; last_echo = $lastEcho } | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
-    _p 0; exit 0
+    Write-PerfLog 0; exit 0
 }
 
 $reminder = "[echo-of-prompt #$count]`n$taskContext`n[Re-read. Verify current action still serves the original task.]"
 @{ count = $count; last_echo = $count } | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 Write-Output (@{ hookSpecificOutput = @{ hookEventName = "UserPromptSubmit"; additionalContext = $reminder } } | ConvertTo-Json -Compress)
-_p 0; exit 0
+Write-PerfLog 0; exit 0

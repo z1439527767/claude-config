@@ -6,4 +6,4 @@ if (Test-Path $guardFile) {
     Get-Content $guardFile -Raw | Write-Output
     Remove-Item $guardFile -Force
 }
-_p 0; exit 0
+Write-PerfLog 0; exit 0

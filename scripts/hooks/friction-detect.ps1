@@ -6,7 +6,7 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "friction-detect"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
-if (-not $prompt) { exit 0 }
+if (-not $prompt) { Write-PerfLog 0; exit 0 }
 
 # ── Multi-language correction signals ──
 $signals = @{
@@ -37,7 +37,7 @@ foreach ($sig in $signals.Keys) {
         $categories[$cat]++
     }
 }
-if ($matched.Count -eq 0) { exit 0 }
+if ($matched.Count -eq 0) { Write-PerfLog 0; exit 0 }
 
 # ── Record friction event ──
 $frictionDir = "$env:USERPROFILE\.claude\.claude\tellonce-state\friction"
@@ -87,4 +87,4 @@ if ($escalatedCategories.Count -gt 0) {
         ConvertTo-Json -Depth 3 | Set-Content $proposalFile -Encoding UTF8
 }
 
-exit 0
+Write-PerfLog 0; exit 0

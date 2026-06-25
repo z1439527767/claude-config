@@ -16,4 +16,4 @@ Session context was compacted. Core constraints survive.
 "@
 Write-Output $guard
 $guard | Set-Content "$env:USERPROFILE\.claude\.claude\post_compact_guard.txt" -Encoding UTF8
-_p 0; exit 0
+Write-PerfLog 0; exit 0

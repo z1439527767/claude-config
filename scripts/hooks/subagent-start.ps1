@@ -23,4 +23,4 @@ Add-Content "$logDir\subagent_spawns.jsonl" -Value $entry -Encoding UTF8
 $lines = Get-Content "$logDir\subagent_spawns.jsonl" -Encoding UTF8 -ErrorAction SilentlyContinue
 if ($lines.Count -gt 50) { $lines[-50..-1] | Set-Content "$logDir\subagent_spawns.jsonl" -Encoding UTF8 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0

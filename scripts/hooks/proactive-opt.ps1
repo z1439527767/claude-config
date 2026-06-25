@@ -87,4 +87,4 @@ if ($suggestions.Count -gt 0) {
     Write-Output "PROACTIVE:`n$msg"
 }
 
-_p 0; exit 0
+Write-PerfLog 0; exit 0
