@@ -156,6 +156,23 @@
           },
           {
             "type": "command",
+            "command": "python3 C:\\Users\\z1439\\.claude\\scripts\\verify-all.py --quick",
+            "timeout": 15,
+            "runInBackground": true
+          },
+          {
+            "type": "command",
+            "command": "python3 C:\\Users\\z1439\\.claude\\scripts\\auto-heal.py --dry-run",
+            "timeout": 10,
+            "runInBackground": true
+          },
+          {
+            "type": "command",
+            "command": "python3 C:\\Users\\z1439\\.claude\\scripts\\watchdog.py --init",
+            "timeout": 2
+          },
+          {
+            "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
             "timeout": 0.2
           }

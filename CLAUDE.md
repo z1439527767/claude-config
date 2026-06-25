@@ -44,10 +44,10 @@
 @.claude/rules/memory-layers.md  — 五层记忆：L0 元规则 → L4 会话归档
 scripts/health-check.py          — 健康仪表板：disk/git/hooks/evo/memory/failures
 scripts/sense-signals.py         — 挫败感知：检测用户重复/简短/命令式/纠正信号
-scripts/safe-cmd.ps1             — 命令安全：allowlist + 注入检测
-scripts/circuit-breaker.ps1      — 熔断器：CLOSED→OPEN→HALF_OPEN，5次失败自动断
-scripts/error-budget.ps1         — 错误预算：SLO 99.5%，双速燃尽率告警
-scripts/rogue-detector.ps1       — Rogue检测：z-score频率+熵检测，防隧道视野
+scripts/safe-cmd.ps1                — 命令安全：allowlist + 注入检测
+scripts/lib/circuit-breaker.ps1     — 熔断器：CLOSED→OPEN→HALF_OPEN，5次失败自动断
+scripts/lib/error-budget.ps1        — 错误预算：SLO 99.5%，双速燃尽率告警
+scripts/hooks/rogue-detector.ps1    — Rogue检测：z-score频率+熵检测，防隧道视野
 scripts/heuristic-extract.py     — 启发式提取：从经验蒸馏简洁规则（ERL模式）
 
 ## 8. 记忆
