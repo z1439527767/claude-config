@@ -34,10 +34,10 @@ if (Test-Path $gateFile) {
         $gate = Get-Content $gateFile -Raw | ConvertFrom-Json
         $lastEvo = [datetime]$gate.last_evolution
         $hoursSince = ($now - $lastEvo).TotalHours
-        # Active dev: 10min minimum between evolutions
-        if ($hoursSince -lt 0.17) {
+        # Active dev: 5min minimum between evolutions
+        if ($hoursSince -lt 0.083) {
             $canEvolve = $false
-            $gateReason = "距上次进化 ${hoursSince}h < 10min"
+            $gateReason = "距上次进化 ${hoursSince}h < 5min"
         }
         # Reduced from 3/week to 10/week for active development
         $recentEvos = ($gate.recent_evo_timestamps | ForEach-Object { [datetime]$_ }) |
@@ -445,11 +445,12 @@ if ($applied.Count -gt 0) {
 # ═══════════════════════════════════════
 $allChanges = @($applied) + @($changes)
 
-if ($allChanges.Count -gt 0) {
-    $event = @{ timestamp = (Get-Date -Format "o"); type = "evolution"; changes = $allChanges }
-    $event | ConvertTo-Json -Compress | Add-Content $evolveLog -Encoding UTF8
+# Log ALL observations, but only update gate for actual modifications
+$event = @{ timestamp = (Get-Date -Format "o"); type = "evolution"; changes = $allChanges }
+$event | ConvertTo-Json -Compress | Add-Content $evolveLog -Encoding UTF8
 
-    # Update gate
+if ($applied.Count -gt 0) {
+    # Update gate — only when real changes applied (not just L5 observations)
     $gateData = @{
         last_evolution = (Get-Date -Format "o")
         session_count_since_last = 0
