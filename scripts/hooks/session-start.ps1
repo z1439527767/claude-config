@@ -65,52 +65,34 @@ Get-ChildItem $scriptsDir -Recurse -Filter "*.ps1" -ErrorAction SilentlyContinue
 $totalScripts = (Get-ChildItem $scriptsDir -Recurse -Filter "*.ps1" -ErrorAction SilentlyContinue).Count
 
 # ═══════════════════════════════════════════
-# PHASE 2: Memory — Score + Inject
+# PHASE 2: Memory Score (background)
 # ═══════════════════════════════════════════
 & pwsh -NoProfile -ExecutionPolicy Bypass -File "$baseDir\scripts\hooks\memory-score.ps1" -RecordAccess:$true 2>&1 | Out-Null
 
-$memInject = python3 "$baseDir\scripts\memory-search.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $memInject) { $ctxLines += $memInject }
+# ═══════════════════════════════════════════
+# PHASES 3-6d: Parallel brain module injection
+# 7 Python scripts run concurrently — independent, no shared state
+# ═══════════════════════════════════════════
+$injectors = @(
+    @{key="memory";     script="memory-search.py"},
+    @{key="identity";   script="identity-journal.py"},
+    @{key="intuition";  script="intuition-engine.py"},
+    @{key="immune";     script="immune-system.py"},
+    @{key="salience";   script="salience-gate.py"},
+    @{key="intero";     script="interoception.py"},
+    @{key="neuro";      script="neuromodulation.py"}
+)
+$logFile = "$baseDir\logs\session-errors.log"
+$results = $injectors | ForEach-Object -Parallel {
+    $output = python3 "$using:baseDir\scripts\$($_.script)" --inject 2>> "$using:logFile"
+    if ($LASTEXITCODE -eq 0 -and $output) {
+        @{key=$_.key; text=$output}
+    } else { $null }
+} -ThrottleLimit 7
 
-# ═══════════════════════════════════════════
-# PHASE 3: Identity — Who am I?
-# ═══════════════════════════════════════════
-$identityInject = python3 "$baseDir\scripts\identity-journal.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $identityInject) { $ctxLines += "`n$identityInject" }
-
-# ═══════════════════════════════════════════
-# PHASE 4: Intuition — Fast pattern match
-# ═══════════════════════════════════════════
-$intuitionInject = python3 "$baseDir\scripts\intuition-engine.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $intuitionInject) { $ctxLines += "`n$intuitionInject" }
-
-# ═══════════════════════════════════════════
-# PHASE 5: Immune — Threat status
-# ═══════════════════════════════════════════
-$immuneInject = python3 "$baseDir\scripts\immune-system.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $immuneInject) { $ctxLines += "`n$immuneInject" }
-
-# ═══════════════════════════════════════════
-# PHASE 6: Narrative — DISABLED (empty output, not enough data to narrate)
-# ═══════════════════════════════════════════
-
-# ═══════════════════════════════════════════
-# PHASE 6b: Salience — Attention gate status
-# ═══════════════════════════════════════════
-$salienceInject = python3 "$baseDir\scripts\salience-gate.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $salienceInject) { $ctxLines += "`n$salienceInject" }
-
-# ═══════════════════════════════════════════
-# PHASE 6c: Interoception — Internal state
-# ═══════════════════════════════════════════
-$interoInject = python3 "$baseDir\scripts\interoception.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $interoInject) { $ctxLines += "`n$interoInject" }
-
-# ═══════════════════════════════════════════
-# PHASE 6d: Neuromodulation — Reward learning
-# ═══════════════════════════════════════════
-$neuroInject = python3 "$baseDir\scripts\neuromodulation.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $neuroInject) { $ctxLines += "`n$neuroInject" }
+foreach ($r in $results) {
+    if ($r) { $ctxLines += "`n$($r.text)" }
+}
 
 # ═══════════════════════════════════════════
 # PHASE 7: CLAUDE.local.md Context

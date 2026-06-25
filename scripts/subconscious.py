@@ -182,16 +182,19 @@ def detect_anomalies():
         except Exception:
             pass
 
-    # Check hook performance anomalies
+    # Check hook performance anomalies (fixed: *.jsonl, line-by-line JSONL parse)
     perf_dir = CLAUDE / '.claude' / 'hook_perf'
     if perf_dir.exists():
         timeout_hooks = []
-        for pf in perf_dir.glob("*.json"):
+        for pf in perf_dir.glob("*.jsonl"):
             try:
-                data = json.loads(pf.read_text(encoding='utf-8'))
-                last_runs = data if isinstance(data, list) else [data]
+                last_runs = []
+                for line in pf.read_text(encoding='utf-8', errors='replace').strip().split('\n'):
+                    if line.strip():
+                        try: last_runs.append(json.loads(line))
+                        except json.JSONDecodeError: pass
                 for run in last_runs[-10:]:  # Last 10 runs
-                    if run.get('duration_ms', 0) > 5000:  # >5s
+                    if run.get('d', 0) > 5000:  # >5s (field is 'd' not 'duration_ms')
                         timeout_hooks.append(pf.stem)
             except Exception:
                 pass
