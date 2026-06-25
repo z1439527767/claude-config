@@ -476,9 +476,17 @@ if ($applied.Count -gt 0) {
 # ═══════════════════════════════════════
 $allChanges = @($applied) + @($changes)
 
-# Log ALL observations, but only update gate for actual modifications
-$event = @{ timestamp = (Get-Date -Format "o"); type = "evolution"; changes = $allChanges }
-$event | ConvertTo-Json -Compress | Add-Content $evolveLog -Encoding UTF8
+# Skip logging empty runs — nothing to record
+if ($allChanges.Count -gt 0) {
+    $event = @{ timestamp = (Get-Date -Format "o"); type = "evolution"; changes = $allChanges }
+    $event | ConvertTo-Json -Compress | Add-Content $evolveLog -Encoding UTF8
+
+    # Rotation: keep log bounded at 100 lines
+    $logLines = @(Get-Content $evolveLog -Encoding UTF8 | Where-Object { $_ })
+    if ($logLines.Count -gt 100) {
+        $logLines[-80..-1] | Set-Content $evolveLog -Encoding UTF8
+    }
+}
 
 if ($applied.Count -gt 0) {
     # Update gate — only when real changes applied (not just L5 observations)
