@@ -46,6 +46,88 @@ function Save-RecentProject {
     $recent | ConvertTo-Json | Set-Content $RECENT_FILE -Encoding UTF8
 }
 
+function Initialize-Project {
+    param([string]$Path, [string]$Name = "")
+
+    if (-not $Name) { $Name = Split-Path $Path -Leaf }
+
+    Write-Host "  🏗️  Initializing new project: $Name" -ForegroundColor Cyan
+
+    # Git init
+    $isGit = $false
+    try {
+        git -C $Path rev-parse --show-toplevel 2>$null
+        $isGit = ($LASTEXITCODE -eq 0)
+    } catch { $isGit = $false }
+
+    if (-not $isGit) {
+        git -C $Path init 2>$null | Out-Null
+        Write-Host "     ✓ git init" -ForegroundColor DarkGray
+    }
+
+    # .gitignore
+    $gitignore = Join-Path $Path ".gitignore"
+    if (-not (Test-Path $gitignore)) {
+        @"
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets
+.env
+.env.local
+*.pem
+"@ | Set-Content $gitignore -Encoding UTF8
+        Write-Host "     ✓ .gitignore" -ForegroundColor DarkGray
+    }
+
+    # CLAUDE.md template
+    $claudeMd = Join-Path $Path "CLAUDE.md"
+    if (-not (Test-Path $claudeMd)) {
+        @"
+# $Name
+
+## Tech Stack
+-
+
+## Commands
+-
+
+## Code Style
+-
+
+## Project Structure
+-
+
+## Notes
+- Ralph Loop agent tools available: verify-all, data-pack, cross-review, orchestrator
+"@ | Set-Content $claudeMd -Encoding UTF8
+        Write-Host "     ✓ CLAUDE.md" -ForegroundColor DarkGray
+    }
+
+    # CONVENTIONS.md (shared standards, symlink or copy)
+    $conventions = Join-Path $Path "CONVENTIONS.md"
+    if (-not (Test-Path $conventions)) {
+        Copy-Item "$CORE_PATH\CONVENTIONS.md" $conventions
+        Write-Host "     ✓ CONVENTIONS.md (copied from core)" -ForegroundColor DarkGray
+    }
+
+    Write-Host "  ✅ Project ready: $Path" -ForegroundColor Green
+}
+
 function Show-RecentProjects {
     if (Test-Path $RECENT_FILE) {
         try {
@@ -95,12 +177,13 @@ if ($Self) {
     Write-Host "  📁 MODE: PROJECT — Working on user project" -ForegroundColor Green
     Write-Host "  📂 Path: $ProjectPath" -ForegroundColor Green
 } elseif ($ProjectPath) {
-    # CLI arg provided but doesn't exist — create?
+    # CLI arg provided but doesn't exist — create + initialize
     Write-Host "  ⚠️  Path does not exist: $ProjectPath" -ForegroundColor Red
-    $create = Read-Host "  Create? [Y/n]"
+    $create = Read-Host "  Create new project? [Y/n]"
     if ($create -ne 'n') {
         New-Item -ItemType Directory -Force $ProjectPath | Out-Null
-        Write-Host "  ✅ Created: $ProjectPath" -ForegroundColor Green
+        $ProjectPath = (Resolve-Path $ProjectPath).Path
+        Initialize-Project $ProjectPath
     } else {
         $ProjectPath = ""
     }
@@ -114,7 +197,7 @@ if (-not $ProjectPath) {
 
     Write-Host "  Select project:" -ForegroundColor White
     Write-Host "    [number] — Recent project by index" -ForegroundColor DarkGray
-    Write-Host "    [path]   — Absolute or relative path" -ForegroundColor DarkGray
+    Write-Host "    [path]   — Existing or NEW project path" -ForegroundColor DarkGray
     Write-Host "    [.]      — Current directory: $(Get-Location)" -ForegroundColor DarkGray
     Write-Host "    [self]   — Ralph's core system ($CORE_PATH)" -ForegroundColor DarkGray
     Write-Host "    [empty]  — Use current directory" -ForegroundColor DarkGray
@@ -146,8 +229,16 @@ if (-not $ProjectPath) {
         $ProjectPath = (Resolve-Path $choice).Path
         Write-Host "  📁 $ProjectPath" -ForegroundColor Green
     } else {
-        Write-Host "  ❌ Path not found: $choice" -ForegroundColor Red
-        exit 1
+        # Path doesn't exist — offer to create new project
+        Write-Host "  🆕 Path does not exist: $choice" -ForegroundColor Yellow
+        $create = Read-Host "  Create new project here? [Y/n]"
+        if ($create -ne 'n') {
+            New-Item -ItemType Directory -Force $choice | Out-Null
+            $ProjectPath = (Resolve-Path $choice).Path
+            Initialize-Project $ProjectPath
+        } else {
+            exit 0
+        }
     }
 }
 
