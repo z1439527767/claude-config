@@ -82,7 +82,7 @@ if ($escalatedCategories.Count -gt 0) {
         "noise"      = "太吵 — 减少 hook 输出噪音"
         "negation"   = "否定反馈 — 方向错误，调整理解"
     }
-    $action = $actionMap[$topCat] ?? "用户 $($recent.Count) 次纠正 — 需要调整"
+    $action = if ($actionMap.ContainsKey($topCat)) { $actionMap[$topCat] } else { "用户 $($recent.Count) 次纠正 — 需要调整" }
     @{ friction_count = $recent.Count; category = $topCat; action = $action; recent = @($recent | Select-Object -Last 3) } |
         ConvertTo-Json -Depth 3 | Set-Content $proposalFile -Encoding UTF8
 }

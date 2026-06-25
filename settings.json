@@ -140,6 +140,11 @@
           },
           {
             "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-score.ps1\" -RecordAccess:`$false",
+            "timeout": 0.3
+          },
+          {
+            "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\proactive-opt.ps1\"",
             "timeout": 5,
             "runInBackground": true

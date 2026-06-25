@@ -19,7 +19,8 @@ $stateFile = "$projDir\.claude\metacog.state.json"
 if (Test-Path $stateFile) {
     try { $state = Get-Content $stateFile -Raw | ConvertFrom-Json } catch { $state = $null }
     if ($state -and $state.actions) {
-        . "$env:USERPROFILE\.claude\scripts\lib\metacog-detect.ps1" -actions @($state.actions) -turnCount ($state.turn_count ?? 0) -now $now
+        $tc = if ($state.turn_count) { [int]$state.turn_count } else { 0 }
+        . "$env:USERPROFILE\.claude\scripts\lib\metacog-detect.ps1" -actions @($state.actions) -turnCount $tc -now $now
     }
 }
 
@@ -31,7 +32,13 @@ if (Test-Path $frictionDir) {
     $recentFriction = $allFriction | Where-Object { $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-1) }
     if ($recentFriction.Count -ge 3) {
         $catCounts = @{}
-        foreach ($f in $recentFriction) { foreach ($c in ($f.categories -split ', ')) { if (-not $catCounts[$c]) { $catCounts[$c] = 0 }; $catCounts[$c]++ } }
+        foreach ($f in $recentFriction) {
+            $cats = if ($f.categories -is [array]) { $f.categories } else { @($f.categories -split ', ') }
+            foreach ($c in $cats) {
+                if (-not $catCounts[$c]) { $catCounts[$c] = 0 }
+                $catCounts[$c]++
+            }
+        }
         $topCat = ($catCounts.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 1)
         if ($topCat.Value -ge 3) {
             $catLessonMap = @{
@@ -44,9 +51,11 @@ if (Test-Path $frictionDir) {
                 "slow" = "Perceived slowness. Optimize parallelism, reduce unnecessary tool calls."
                 "noise" = "Hook output is too noisy. Audit hooks for excessive stdout."
             }
-            $lesson = $catLessonMap[$topCat.Name] ?? "Friction category '$($topCat.Name)' triggered $($topCat.Value) times in 24h."
-            $script:learnings += @{ pattern = "friction_$($topCat.Name)"; type = "detection"; category = "User Friction"
-                lesson = $lesson; detected_at = $now.ToString("o"); session_turn_count = ($state.turn_count ?? 0) }
+            $lesson = if ($catLessonMap.ContainsKey($topCat.Name)) { $catLessonMap[$topCat.Name] } else { "Friction category '$($topCat.Name)' triggered $($topCat.Value) times in 24h." }
+            $script:learnings += @{
+                pattern = "friction_$($topCat.Name)"; type = "detection"; category = "User Friction"
+                lesson = $lesson; detected_at = $now.ToString("o"); session_turn_count = if ($state.turn_count) { [int]$state.turn_count } else { 0 }
+            }
         }
     }
 }
@@ -60,9 +69,11 @@ if (Test-Path $evolveLog) {
     $l2Count = ($todayEvos | ForEach-Object { $_.changes } | Where-Object { $_ -match "L2:" }).Count
     $l3Count = ($todayEvos | ForEach-Object { $_.changes } | Where-Object { $_ -match "L3:" }).Count
     if (($l1Count + $l2Count + $l3Count) -ge 3) {
-        $script:learnings += @{ pattern = "active_evolution"; type = "detection"; category = "Self-Evolution"
+        $script:learnings += @{
+            pattern = "active_evolution"; type = "detection"; category = "Self-Evolution"
             lesson = "Evolution active: L1=$l1Count L2=$l2Count L3=$l3Count in 24h."
-            detected_at = $now.ToString("o"); session_turn_count = ($state.turn_count ?? 0) }
+            detected_at = $now.ToString("o"); session_turn_count = if ($state.turn_count) { [int]$state.turn_count } else { 0 }
+        }
     }
 }
 
@@ -78,7 +89,7 @@ $newLearnings = $script:learnings | Where-Object { -not $existingPatterns[$_.pat
 
 if ($newLearnings.Count -gt 0) {
     $lines = ($newLearnings | ForEach-Object { $_ | ConvertTo-Json -Compress }) -join "`n"
-    foreach ($dir in @(Split-Path $learningsGlobal -Parent, Split-Path $learningsProject -Parent)) {
+    foreach ($dir in (Split-Path $learningsGlobal -Parent), (Split-Path $learningsProject -Parent)) {
         if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
     }
     Add-Content -Path $learningsGlobal -Value $lines -Encoding UTF8

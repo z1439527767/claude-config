@@ -6,8 +6,8 @@ $perfHookName = "subagent-stop"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 # The hook receives subagent info via environment or stdin
-$agentType = $env:SUBAGENT_TYPE ?? "unknown"
-$agentResult = $env:SUBAGENT_RESULT ?? ""
+$agentType = if ($env:SUBAGENT_TYPE) { $env:SUBAGENT_TYPE } else { "unknown" }
+$agentResult = if ($env:SUBAGENT_RESULT) { $env:SUBAGENT_RESULT } else { "" }
 
 $perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
 if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | Out-Null }
