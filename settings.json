@@ -1,0 +1,204 @@
+{
+  "env": {
+    "DEEPSEEK_API_KEY": "${DEEPSEEK_API_KEY}",
+    "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
+    "DEEPSEEK_DEFAULT_MODEL": "deepseek-reasoner",
+    "DEEPSEEK_MODEL": "deepseek-reasoner",
+    "CLAUDE_CODE_DEFAULT_EFFORT": "high",
+    "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
+    "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
+    "CLAUDE_AUTOCOMPACT_PCT": "70",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16000"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-safety.ps1\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-verify.ps1\" -tool_name \"${tool_name}\" -tool_input '${tool_input}'",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\nudge.ps1\"",
+            "timeout": 3,
+            "runInBackground": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\verify-scripts-syntax.ps1\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-inject.ps1\"",
+            "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
+            "timeout": 10
+          },
+          {
+            "type": "agent",
+            "prompt": "Check if nudge_pending.txt exists at C:\\Users\\z1439\\.claude\\.claude\\nudge_pending.txt. If it does exist and was created within the last 30 minutes (compare its content timestamp with current time), then: (1) read the evolution log at C:\\Users\\z1439\\.claude\\.claude\\evolution_log.jsonl (last 30 entries), (2) read friction events at C:\\Users\\z1439\\.claude\\.claude\\tellonce-state\\friction\\events.jsonl (last 20 entries), (3) read success patterns from CLAUDE.local.md and the knowledge graph, (4) do a quick review identifying recurring patterns, emerging friction, or success patterns worth distilling, (5) write findings to C:\\Users\\z1439\\.claude\\.claude\\nudge_findings.json with structure { \"timestamp\": \"...\", \"patterns\": [...], \"friction\": [...], \"success_patterns\": [...], \"recommendations\": [...] }, (6) delete the nudge_pending.txt flag file. If nudge_pending.txt doesn't exist or its content is more than 30 minutes old, do nothing.",
+            "timeout": 30
+          },
+          {
+            "type": "agent",
+            "prompt": "Read the friction log at C:\\Users\\z1439\\.claude\\.claude\\tellonce-state\\friction\\events.jsonl (last 50 lines max). Also read the last_session_success.json at C:\\Users\\z1439\\.claude\\.claude\\last_session_success.json. If there are friction events, semantically understand what specific behavior the user was correcting. Then read CLAUDE.md and AGENTS.md at C:\\Users\\z1439\\.claude\\. If a specific, actionable rule can be added to prevent the exact friction pattern, Edit the file to add it. Rules must be: (1) specific to the actual friction, not generic, (2) in negative constraint format for AGENTS.md, (3) in behavioral format for CLAUDE.md. If no clear pattern or already covered by existing rules, do nothing. Don't add rules for one-off corrections. Skip if friction log is empty or has <2 events.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-sediment.ps1\"",
+            "timeout": 5
+          },
+          {
+            "type": "prompt",
+            "prompt": "Review this session. Did Claude: (1) complete the user's task? (2) verify changes with external evidence (tests, exit codes, file content)? (3) update CLAUDE.local.md if learnings occurred? Return 'approve' if all yes, or 'block' explaining what's missing.",
+            "timeout": 10
+          },
+          {
+            "type": "agent",
+            "prompt": "You are an adversarial code reviewer. Review ALL changes made in this session. Find: (1) bugs or logic errors, (2) missing edge cases, (3) unverified claims — things Claude said 'done' but didn't prove with external evidence, (4) missed related files that should have been changed. Be skeptical. If nothing wrong, say 'PASS'. If issues found, list them with file paths.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-snapshot.ps1\" -Message \"session-end\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\session-end.ps1\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-stop.ps1\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\precompact-guard.ps1\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "skipWorkflowUsageWarning": true,
+  "skipAutoPermissionPrompt": true,
+  "skipBypassPermissionsModePrompt": true,
+  "mcpServers": {
+    "linear": {
+      "type": "http",
+      "url": "https://mcp.linear.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LINEAR_MCP_TOKEN}"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server"
+      ]
+    },
+    "obsidian": {
+      "type": "http",
+      "url": "http://localhost:27123/",
+      "headers": {
+        "Authorization": "Bearer ${OBSIDIAN_MCP_TOKEN}"
+      }
+    },
+    "tabby": {
+      "type": "sse",
+      "url": "http://localhost:3001/sse"
+    }
+  },
+  "skipDangerousModePermissionPrompt": true
+}
