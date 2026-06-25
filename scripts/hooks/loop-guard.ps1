@@ -1,5 +1,6 @@
-# loop-guard.ps1 v2 — Universal autonomous loop
+# loop-guard.ps1 v3 — Autonomous loop + auto-compact trigger
 # Works for ANY task, not just self-evolution. Reads task from file.
+# NOW WITH: autonomous /compact when context pressure > 85%
 param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "loop-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
@@ -8,10 +9,32 @@ $stateFile = "$env:USERPROFILE\.claude\.claude\loop_state.json"
 $taskFile = "$env:USERPROFILE\.claude\.claude\active_task.md"
 $haltFile = "$env:USERPROFILE\.claude\.claude\HALT"
 $cooldownFile = "$env:USERPROFILE\.claude\.claude\loop_cooldown"
+$compactFlag = "$env:USERPROFILE\.claude\.claude\compact_needed.flag"
 $defaultTask = "AUTONOMOUS: 1) Search web for new Claude Code patterns. Apply any findings to CLAUDE.md/AGENTS.md/settings.json immediately. 2) Run evolve.ps1 + auto-distill.ps1. 3) Verify syntax+JSON+refs. 4) Fix issues. 5) Update handoff.md. 6) Schedule next wakeup."
 
 # HALT overrides everything
 if (Test-Path $haltFile) { Write-PerfLog 0; exit 0 }
+
+# ═══ AUTO-COMPACT CHECK ═══
+# If context pressure is critical, trigger compact BEFORE continuing loop
+if (Test-Path $compactFlag) {
+    try {
+        $flagTime = [datetime](Get-Content $compactFlag -Raw)
+        $age = ((Get-Date) - $flagTime).TotalMinutes
+        if ($age -lt 5) {
+            # Recent compact flag: trigger autonomous compact
+            Remove-Item $compactFlag -Force -ErrorAction SilentlyContinue
+            $block = @{
+                decision = "compact"
+                reason = "AUTO-COMPACT: Context pressure detected. Compacting before continuing."
+            } | ConvertTo-Json -Compress
+            Write-Output $block
+            Write-PerfLog 0; exit 0
+        }
+    } catch {
+        Remove-Item $compactFlag -Force -ErrorAction SilentlyContinue
+    }
+}
 
 # Cooldown: only block every 2min
 $cooldownMin = 0
@@ -37,9 +60,8 @@ if (Test-Path $taskFile) {
     if ($customTask) { $task = $customTask }
 }
 
-# Stop conditions — ONLY HALT file or critical failure. Agent decides, not hardcoded numbers.
+# Stop conditions — ONLY HALT file or critical failure
 $shouldStop = $false
-# Agent can create ESCALATE.md to request review, but loop continues
 if (Test-Path $haltFile) { $shouldStop = $true }
 
 $state | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
