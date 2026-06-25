@@ -80,6 +80,12 @@
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\tool-failure-log.ps1\"",
             "timeout": 0.5,
             "runInBackground": true
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\circuit-guard.ps1\"",
+            "timeout": 0.3,
+            "runInBackground": true
           }
         ]
       }

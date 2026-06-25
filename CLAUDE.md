@@ -39,6 +39,7 @@
 scripts/health-check.py          — 健康仪表板：disk/git/hooks/evo/memory/failures
 scripts/sense-signals.py         — 挫败感知：检测用户重复/简短/命令式/纠正信号
 scripts/safe-cmd.ps1             — 命令安全：allowlist + 注入检测
+scripts/circuit-breaker.ps1      — 熔断器：CLOSED→OPEN→HALF_OPEN，5次失败自动断
 
 ## 8. 记忆
 @.claude/rules/memory.md
