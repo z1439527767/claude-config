@@ -58,11 +58,57 @@ if (Test-Path $settingsPath) {
         $mcpServers = $settings.mcpServers | Get-Member -MemberType NoteProperty -ErrorAction SilentlyContinue
         if (-not $mcpServers) {
             $issues += "[mcp-drift] No MCP servers in settings.json"
+        } else {
+            $mcpNames = $mcpServers | ForEach-Object { $_.Name }
+
+            # Cross-check against npm global MCP packages
+            $npmGlobal = "$env:APPDATA/npm"
+            $npmMcps = Get-ChildItem "$npmGlobal" -Filter "*mcp*" -ErrorAction SilentlyContinue |
+                ForEach-Object { $_.BaseName -replace '\.cmd$','' -replace '\.ps1$','' } |
+                Sort-Object -Unique
+
+            # MCP servers in settings.json but NOT in npm global
+            $zombieMcps = $mcpNames | Where-Object { $_ -notin $npmMcps }
+            if ($zombieMcps) {
+                $issues += "[mcp-zombie] $($zombieMcps.Count) MCP in settings.json not in npm: $($zombieMcps -join ', ')"
+            }
+
+            # MCP servers in npm but NOT in settings.json (informational, not an error)
+            $orphanMcps = $npmMcps | Where-Object { $_ -notin $mcpNames }
+            if ($orphanMcps) {
+                $fixed += "[mcp-external] $($orphanMcps.Count) MCP via npm/marketplace: $($orphanMcps -join ', ')"
+            }
+
+            # Flag project MCP in framework config
+            $projectMcps = @('comfyui', 'comfyui-mcp')
+            $leaked = $mcpNames | Where-Object { $_ -in $projectMcps }
+            if ($leaked) {
+                $issues += "[mcp-project-leak] Project MCP in framework settings.json: $($leaked -join ', ')"
+            }
         }
 
         $hooks = $settings.hooks | Get-Member -MemberType NoteProperty -ErrorAction SilentlyContinue
         if (-not $hooks) {
             $issues += "[hook-drift] No hooks in settings.json"
+        } else {
+            # Verify every hook script referenced in settings.json exists
+            $hookCount = 0; $missingScripts = @()
+            foreach ($event in ($settings.hooks | Get-Member -MemberType NoteProperty)) {
+                foreach ($entry in $settings.hooks.($event.Name)) {
+                    foreach ($h in $entry.hooks) {
+                        $hookCount++
+                        if ($h.command -match 'z1439\\(?:\\.claude\\)?(scripts\\(?:hooks\\)?([^" ]+\.ps1))') {
+                            $scriptPath = "$HomeDir/.claude/$($Matches[1])"
+                            if (-not (Test-Path $scriptPath)) {
+                                $missingScripts += $Matches[1]
+                            }
+                        }
+                    }
+                }
+            }
+            if ($missingScripts) {
+                $issues += "[hook-missing] $($missingScripts.Count) hook scripts referenced but missing: $($missingScripts -join ', ')"
+            }
         }
     } catch {
         $issues += "[settings-parse] Failed to parse settings.json: $_"
