@@ -8,6 +8,10 @@ if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force $logDir | Ou
 $toolName = $env:CLAUDE_TOOL_NAME
 $toolInput = $env:CLAUDE_TOOL_INPUT
 $errorMsg = $env:CLAUDE_TOOL_ERROR
+
+# Skip PostToolUseFailure noise — harness fires this for internal operations
+# where no tool metadata is available. Real failures always have either toolName or errorMsg.
+if ((-not $toolName) -and (-not $errorMsg)) { exit 0 }
 if (-not $toolName) { $toolName = "unknown" }
 
 # Log the failure
