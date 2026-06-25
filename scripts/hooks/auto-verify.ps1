@@ -56,15 +56,15 @@ switch ($ext) {
     }
     ".json" {
         # Use forward slashes to avoid Python unicode escape issues on Windows
-        $fixedPath = $filePath -replace '\\', '/'
-        $err = python -c "import json; json.load(open('$fixedPath'))" 2>&1
+        # path passed as sys.argv for safety
+        $err = python -c "import json, sys; json.load(open(sys.argv[1]))" "$filePath" 2>&1
         if ($LASTEXITCODE -ne 0) {
             $isHealable = $err -match "trailing|comma|Expecting.*property|delimiter|Extra data"
             $errors += @{file=$filePath; type="json"; msg=$err; canHeal=$isHealable}
         }
     }
     { $_ -in ".yaml", ".yml" } {
-        $err = python -c "import yaml; yaml.safe_load(open('$filePath'))" 2>&1
+        $err = python -c "import yaml, sys; yaml.safe_load(open(sys.argv[1]))" "$filePath" 2>&1
         if ($LASTEXITCODE -ne 0) { $errors += @{file=$filePath; type="yaml"; msg=$err; canHeal=$false} }
     }
 }
@@ -88,7 +88,7 @@ foreach ($e in $errors) {
     $retryOk = $false
     switch ($e.type) {
         "py" { python -m py_compile $e.file 2>&1 | Out-Null; $retryOk = ($LASTEXITCODE -eq 0) }
-        "json" { python -c "import json; json.load(open('$fp'))" 2>&1 | Out-Null; $retryOk = ($LASTEXITCODE -eq 0) }
+        "json" { python -c "import json, sys; json.load(open(sys.argv[1]))" $e.file 2>&1 | Out-Null; $retryOk = ($LASTEXITCODE -eq 0) }
     }
     if ($retryOk) { $healed += @{file=$e.file; level="retry"}; continue }
 
@@ -122,7 +122,7 @@ foreach ($e in $errors) {
         Set-Content $e.file -Value $newContent -Encoding UTF8 -NoNewline
         switch ($e.type) {
             "py" { python -m py_compile $e.file 2>&1 | Out-Null; $fixOk = ($LASTEXITCODE -eq 0) }
-            "json" { python -c "import json; json.load(open('$fp'))" 2>&1 | Out-Null; $fixOk = ($LASTEXITCODE -eq 0) }
+            "json" { python -c "import json, sys; json.load(open(sys.argv[1]))" $e.file 2>&1 | Out-Null; $fixOk = ($LASTEXITCODE -eq 0) }
         }
     } catch { }
 

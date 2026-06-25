@@ -1,3 +1,8 @@
+---
+mode: always
+description: Core constraints — never forget even in long context
+---
+
 # 核心约束
 > 🔴 Always | 上下文再长也不能忘
 

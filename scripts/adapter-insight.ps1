@@ -51,7 +51,7 @@ if ($Friction -or $All) {
         foreach ($e in $events) {
             if ($e.signals) {
                 foreach ($s in ($e.signals -split ',\s*')) {
-                    $signals[$s] = ($signals[$s] ?? 0) + 1
+                    $signals[$s] = [int]$signals[$s] + 1
                 }
             }
         }

@@ -269,7 +269,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\session-end.ps1\"",
-            "timeout": 5
+            "timeout": 15
           },
           {
             "type": "command",
