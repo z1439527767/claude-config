@@ -43,4 +43,4 @@ if (($count - $lastEcho) -lt $echoInterval) {
 $reminder = "[echo-of-prompt #$count]`n$taskContext`n[Re-read. Verify current action still serves the original task.]"
 @{ count = $count; last_echo = $count } | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 Write-Output (@{ hookSpecificOutput = @{ hookEventName = "UserPromptSubmit"; additionalContext = $reminder } } | ConvertTo-Json -Compress)
-exit 0
+_p 0; exit 0
