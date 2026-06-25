@@ -52,7 +52,7 @@ if ($state.streak -ge 5 -and $state.last_score -ge 95) {
 $state | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
 
 if ($shouldContinue) {
-    $task = "Continue self-evolution: run evolve.ps1, auto-distill.ps1. Verify syntax+JSON+refs. Fix issues. Update handoff.md. Schedule next cycle."
+    $task = "SELF-EVOLUTION: 1) learn-online.ps1 — search web for new patterns 2) evolve.ps1 3) auto-distill.ps1 4) verify syntax+JSON+refs 5) fix issues 6) update handoff.md 7) schedule next wakeup"
     $block = @{
         decision = "block"
         reason = "[SELF-LOOP #$($state.iteration)] $task"
