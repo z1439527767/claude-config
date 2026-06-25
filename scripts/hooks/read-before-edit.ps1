@@ -36,7 +36,7 @@ $normalized = $filePath.Replace('\', '/').ToLower()
 
 if (-not $recentlyRead[$normalized]) {
     Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "READ-BEFORE-EDIT: File not read recently. Read it first before editing." } }'
-    Write-PerfLog 0; exit 0
+    Write-PerfLog 2; exit 2
 }
 
 # Save updated tracker

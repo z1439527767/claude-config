@@ -218,12 +218,19 @@ def scan_system():
             try:
                 content = hf.read_text(encoding='utf-8')
                 # Check exit codes: security hooks must exit 2 on deny
-                if 'exit 0' in content and ('block' in content.lower() or 'deny' in content.lower()):
-                    findings.append({
-                        "level": "high",
-                        "file": str(hf.relative_to(HOME)),
-                        "issue": "Security hook exits 0 on deny (should exit 2)",
-                    })
+                # Only flag if deny/permissionDecision is on a nearby line before exit 0
+                lines = content.split('\n')
+                for i, line in enumerate(lines):
+                    if 'deny' in line.lower() and 'permissionDecision' in line:
+                        # Check next 3 lines for exit 0
+                        nearby = '\n'.join(lines[i:min(i+4, len(lines))])
+                        if 'exit 0' in nearby and 'exit 2' not in nearby:
+                            findings.append({
+                                "level": "high",
+                                "file": str(hf.relative_to(HOME)),
+                                "issue": "Security hook exits 0 on deny (should exit 2)",
+                            })
+                            break
             except Exception:
                 pass
 
