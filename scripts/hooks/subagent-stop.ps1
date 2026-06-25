@@ -17,7 +17,8 @@ if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | 
     timestamp = (Get-Date -Format "o")
     agent_type = $agentType
     result_length = if ($agentResult) { $agentResult.Length } else { 0 }
-} | ConvertTo-Json -Compress | Add-Content "$perfDir\subagent.jsonl" -Encoding UTF8
+} | ConvertTo-Json -Compress | Tee-Object -Variable subJson | Add-Content "$perfDir\subagent.jsonl" -Encoding UTF8
+try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert hook_perf subagent $subJson 2>$null | Out-Null } catch {}
 
 # Track subagent stats
 $subagentLog = "$perfDir\subagent.jsonl"
