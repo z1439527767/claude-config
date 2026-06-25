@@ -113,7 +113,14 @@ Tags: [fresh] >= 0.8 / [aging] >= 0.5 / [stale] >= 0.3 / [expired] under 0.3
 
 "@
 $endIdx = if ($footerSepIdx -ge 0) { $footerSepIdx } else { $lines.Count }
-for ($i = $firstSectionIdx; $i -lt $endIdx; $i++) { $newContent += $lines[$i] + "`n" }
+for ($i = $firstSectionIdx; $i -lt $endIdx; $i++) {
+    $line = $lines[$i]
+    if ($line.Trim() -ne '' -or ($i -gt 0 -and $lines[$i-1].Trim() -ne '')) {
+        $newContent += $line + "`n"
+    }
+}
+# Trim trailing blank lines
+$newContent = $newContent.TrimEnd("`n", "`r") + "`n`n"
 $newContent += @'
 
 ---

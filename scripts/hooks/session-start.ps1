@@ -79,7 +79,15 @@ $totalScripts = (Get-ChildItem $scriptsDir -Recurse -Filter "*.ps1" -ErrorAction
 # ═══════════════════════════════════════════
 # PHASE 2: Ebbinghaus memory scoring (delegated to shared module)
 # ═══════════════════════════════════════════
-& pwsh -NoProfile -ExecutionPolicy Bypass -File "$baseDir\scripts\hooks\memory-score.ps1" -RecordAccess:$false 2>&1 | Out-Null
+& pwsh -NoProfile -ExecutionPolicy Bypass -File "$baseDir\scripts\hooks\memory-score.ps1" -RecordAccess:$true 2>&1 | Out-Null
+
+# ═══════════════════════════════════════════
+# PHASE 2b: Memory context injection (auto-recall)
+# ═══════════════════════════════════════════
+$memInject = python3 "$baseDir\scripts\memory-search.py" --inject 2>$null
+if ($LASTEXITCODE -eq 0 -and $memInject) {
+    $ctxLines += "`n$memInject"
+}
 
 # ═══════════════════════════════════════════
 # PHASE 3: Inject CLAUDE.local.md context
