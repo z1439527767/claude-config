@@ -1,22 +1,23 @@
-# Ralph Launcher v2 — Dual-mode: Self + Project
-# C:\Users\z1439\.claude = Core agent (always loaded)
-# Project path = User-chosen work directory (isolated)
-# Both load: global rules + project rules coexist
+# Ralph Launcher v3 — Two Worlds, One Portal
+# 🧠 SELF  → C:\Users\z1439\.claude  (Ralph's brain — rules, tools, memory)
+# 📁 PROJECT → your chosen directory  (your code — isolated from core)
+# Core capabilities ALWAYS available in both modes.
 
 param(
-    [string]$ProjectPath = "",
-    [switch]$Self = $false,
-    [switch]$ListRecent = $false
+    [string]$Path = "",
+    [switch]$Self,
+    [switch]$List
 )
 
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 # ═══ Config ═══
-$CORE_PATH = "$env:USERPROFILE\.claude"
-$RECENT_FILE = "$CORE_PATH\session-env\recent_projects.json"
+$CORE_PATH    = "$env:USERPROFILE\.claude"
+$RECENT_FILE  = "$CORE_PATH\session-env\recent_projects.json"
+$LAUNCHER_LOG = "$CORE_PATH\.claude\launcher_log.json"
 
-# ═══ API Config ═══
+# ═══ API ═══
 $env:ANTHROPIC_BASE_URL            = "https://api.deepseek.com/anthropic"
 $env:ANTHROPIC_AUTH_TOKEN          = "sk-b395615ed9424e178a1a1c9ef3499310"
 $env:ANTHROPIC_MODEL               = "deepseek-v4-pro"
@@ -25,78 +26,66 @@ $env:ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-pro"
 $env:ANTHROPIC_DEFAULT_HAIKU_MODEL  = "deepseek-v4-flash"
 $env:CLAUDE_CODE_SUBAGENT_MODEL     = "deepseek-v4-flash"
 
-# ═══ Helper Functions ═══
-
-function Write-Banner {
-    Write-Host "╔══════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║  🧠 RALPH LOOP — Agent Launcher v2        ║" -ForegroundColor Cyan
-    Write-Host "╚══════════════════════════════════════════╝" -ForegroundColor Cyan
-    Write-Host ""
-}
-
-function Save-RecentProject {
-    param([string]$Path)
-    $recent = @()
-    if (Test-Path $RECENT_FILE) {
-        try { $recent = Get-Content $RECENT_FILE -Raw | ConvertFrom-Json } catch { $recent = @() }
+# ═══ State ═══
+function Load-State {
+    if (Test-Path $LAUNCHER_LOG) {
+        try { return Get-Content $LAUNCHER_LOG -Raw | ConvertFrom-Json }
+        catch { return @{ last_mode = ""; launch_count = 0 } }
     }
-    # Deduplicate and prepend
-    $recent = @($Path) + ($recent | Where-Object { $_ -ne $Path })
-    $recent = $recent | Select-Object -First 10
-    $recent | ConvertTo-Json | Set-Content $RECENT_FILE -Encoding UTF8
+    return @{ last_mode = ""; launch_count = 0 }
+}
+function Save-State($s) {
+    $s | ConvertTo-Json | Set-Content $LAUNCHER_LOG -Encoding UTF8
 }
 
-function Initialize-Project {
-    param([string]$Path, [string]$Name = "")
-
-    if (-not $Name) { $Name = Split-Path $Path -Leaf }
-
-    Write-Host "  🏗️  Initializing new project: $Name" -ForegroundColor Cyan
-
-    # Git init
-    $isGit = $false
+# ═══ Recent Projects ═══
+function Get-Recent {
+    if (-not (Test-Path $RECENT_FILE)) { return @() }
     try {
-        git -C $Path rev-parse --show-toplevel 2>$null
-        $isGit = ($LASTEXITCODE -eq 0)
-    } catch { $isGit = $false }
+        $all = Get-Content $RECENT_FILE -Raw | ConvertFrom-Json
+        return @($all | Where-Object { Test-Path $_ })
+    } catch { return @() }
+}
+function Add-Recent($p) {
+    $recent = @($p) + (Get-Recent | Where-Object { $_ -ne $p })
+    $recent | Select-Object -First 12 | ConvertTo-Json | Set-Content $RECENT_FILE -Encoding UTF8
+}
 
-    if (-not $isGit) {
-        git -C $Path init 2>$null | Out-Null
-        Write-Host "     ✓ git init" -ForegroundColor DarkGray
+# ═══ Core Stats ═══
+function Get-CoreStats {
+    $tools  = (Get-ChildItem "$CORE_PATH\scripts\*.py" -EA SilentlyContinue).Count
+    $rules  = (Get-ChildItem "$CORE_PATH\.claude\rules\*.md" -EA SilentlyContinue).Count
+    $hooks  = (Get-ChildItem "$CORE_PATH\scripts\hooks\*.ps1" -EA SilentlyContinue).Count
+    $memory = 0
+    $memIdx = "$CORE_PATH\projects\C--Users-z1439--claude\memory\MEMORY.md"
+    if (Test-Path $memIdx) {
+        $mc = Get-Content $memIdx -Raw -Encoding UTF8
+        $memory = ($mc | Select-String '- \[').Matches.Count
     }
+    return @{ tools = $tools; rules = $rules; hooks = $hooks; memory = $memory }
+}
 
-    # .gitignore
-    $gitignore = Join-Path $Path ".gitignore"
-    if (-not (Test-Path $gitignore)) {
+# ═══ Initialize New Project ═══
+function New-Project($Path, $Name) {
+    if (-not $Name) { $Name = Split-Path $Path -Leaf }
+    Write-Host "`n  🏗️  Initializing: $Name" -ForegroundColor Cyan
+
+    $isGit = try { git -C $Path rev-parse --show-toplevel 2>$null; $LASTEXITCODE -eq 0 } catch { $false }
+    if (-not $isGit) { git -C $Path init 2>$null | Out-Null; Write-Host "     ✓ git init" -ForegroundColor DarkGray }
+
+    $gi = Join-Path $Path ".gitignore"
+    if (-not (Test-Path $gi)) {
         @"
-# Dependencies
-node_modules/
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Secrets
-.env
-.env.local
-*.pem
-"@ | Set-Content $gitignore -Encoding UTF8
+node_modules/__pycache__/*.pyc
+.venv/venv/.vscode/.idea/
+Thumbs.db.DS_Store
+.env*.pem
+"@ | Set-Content $gi -Encoding UTF8
         Write-Host "     ✓ .gitignore" -ForegroundColor DarkGray
     }
 
-    # CLAUDE.md template
-    $claudeMd = Join-Path $Path "CLAUDE.md"
-    if (-not (Test-Path $claudeMd)) {
+    $cm = Join-Path $Path "CLAUDE.md"
+    if (-not (Test-Path $cm)) {
         @"
 # $Name
 
@@ -109,190 +98,211 @@ Thumbs.db
 ## Code Style
 -
 
-## Project Structure
--
-
 ## Notes
-- Ralph Loop agent tools available: verify-all, data-pack, cross-review, orchestrator
-"@ | Set-Content $claudeMd -Encoding UTF8
+- Ralph tools available: verify-all, data-pack, cross-review, orchestrator
+"@ | Set-Content $cm -Encoding UTF8
         Write-Host "     ✓ CLAUDE.md" -ForegroundColor DarkGray
     }
 
-    # CONVENTIONS.md (shared standards, symlink or copy)
-    $conventions = Join-Path $Path "CONVENTIONS.md"
-    if (-not (Test-Path $conventions)) {
-        Copy-Item "$CORE_PATH\CONVENTIONS.md" $conventions
-        Write-Host "     ✓ CONVENTIONS.md (copied from core)" -ForegroundColor DarkGray
+    $cv = Join-Path $Path "CONVENTIONS.md"
+    if (-not (Test-Path $cv)) {
+        Copy-Item "$CORE_PATH\CONVENTIONS.md" $cv -EA SilentlyContinue
+        if (Test-Path $cv) { Write-Host "     ✓ CONVENTIONS.md" -ForegroundColor DarkGray }
     }
 
-    Write-Host "  ✅ Project ready: $Path" -ForegroundColor Green
+    Write-Host "  ✅ Ready`n" -ForegroundColor Green
 }
 
-function Show-RecentProjects {
-    if (Test-Path $RECENT_FILE) {
-        try {
-            $recent = Get-Content $RECENT_FILE -Raw | ConvertFrom-Json
-            if ($recent.Count -gt 0) {
-                Write-Host "  Recent projects:" -ForegroundColor DarkGray
-                for ($i = 0; $i -lt $recent.Count; $i++) {
-                    $marker = if ($i -eq 0) { "→" } else { " " }
-                    $exists = if (Test-Path $recent[$i]) { "✓" } else { "✗" }
-                    Write-Host "  $marker [$i] $exists $($recent[$i])" -ForegroundColor DarkGray
-                }
-                Write-Host ""
-            }
-        } catch {}
-    }
-}
+# ═══════════════════════════════════════════
+# RENDER
+# ═══════════════════════════════════════════
 
-function Show-CapabilitySummary {
-    $toolCount = (Get-ChildItem "$CORE_PATH\scripts\*.py" -ErrorAction SilentlyContinue).Count
-    $ruleCount = (Get-ChildItem "$CORE_PATH\.claude\rules\*.md" -ErrorAction SilentlyContinue).Count
-    $agentCount = (Get-ChildItem "$CORE_PATH\.claude\agents\*.md" -ErrorAction SilentlyContinue).Count
-    $hookCount = (Get-ChildItem "$CORE_PATH\scripts\hooks\*.ps1" -ErrorAction SilentlyContinue).Count
+function Show-Header {
+    Clear-Host
+    $stats = Get-CoreStats
+    $state  = Load-State
+    $state.launch_count = [int]$state.launch_count + 1
+    Save-State $state
 
-    Write-Host "  🛠️  Core Capabilities:" -ForegroundColor DarkGray
-    Write-Host "     $toolCount tools | $ruleCount rules | $agentCount agents | $hookCount hooks" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "  ║        🧠  RALPH  LOOP  —  Launch  Portal     ║" -ForegroundColor Cyan
+    Write-Host "  ╠══════════════════════════════════════════════╣" -ForegroundColor Cyan
+    Write-Host "  ║  Core: $($stats.tools) tools | $($stats.rules) rules | $($stats.hooks) hooks | $($stats.memory) memories  ║" -ForegroundColor DarkGray
+    Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 }
 
-# ═══ Main ═══
-
-Write-Banner
-
-# ── Determine Project Path ──
-
-if ($ListRecent) {
-    Show-RecentProjects
-    exit 0
-}
-
-if ($Self) {
-    # Self mode: work on the core agent itself
-    $ProjectPath = $CORE_PATH
-    Write-Host "  🔧 MODE: SELF — Working on Ralph's core system" -ForegroundColor Yellow
-    Write-Host "  📂 Path: $ProjectPath" -ForegroundColor Yellow
-} elseif ($ProjectPath -and (Test-Path $ProjectPath)) {
-    # CLI arg provided and exists
-    Write-Host "  📁 MODE: PROJECT — Working on user project" -ForegroundColor Green
-    Write-Host "  📂 Path: $ProjectPath" -ForegroundColor Green
-} elseif ($ProjectPath) {
-    # CLI arg provided but doesn't exist — create + initialize
-    Write-Host "  ⚠️  Path does not exist: $ProjectPath" -ForegroundColor Red
-    $create = Read-Host "  Create new project? [Y/n]"
-    if ($create -ne 'n') {
-        New-Item -ItemType Directory -Force $ProjectPath | Out-Null
-        $ProjectPath = (Resolve-Path $ProjectPath).Path
-        Initialize-Project $ProjectPath
-    } else {
-        $ProjectPath = ""
+function Show-Recent {
+    $recent = Get-Recent
+    if ($recent.Count -gt 0) {
+        Write-Host "  📂 Recent projects:" -ForegroundColor DarkGray
+        for ($i = 0; $i -lt [Math]::Min($recent.Count, 8); $i++) {
+            $marker = if ($i -eq 0) { "→" } else { " " }
+            $name   = Split-Path $recent[$i] -Leaf
+            $parent = Split-Path $recent[$i] -Parent
+            $parentShort = if ($parent.Length -gt 35) { "..." + $parent.Substring($parent.Length - 32) } else { $parent }
+            Write-Host "     [$i]  $name" -ForegroundColor White -NoNewline
+            Write-Host "  ← $parentShort" -ForegroundColor DarkGray
+        }
+        Write-Host ""
     }
 }
 
-# ── Interactive Selection (if no path yet) ──
+function Show-ModeChoice {
+    Write-Host "  ┌─────────────────────────────┬─────────────────────────────┐" -ForegroundColor DarkGray
+    Write-Host "  │                             │                             │" -ForegroundColor DarkGray
+    Write-Host "  │   " -ForegroundColor DarkGray -NoNewline
+    Write-Host "🧠  SELF" -ForegroundColor Yellow -NoNewline
+    Write-Host "                    │   " -ForegroundColor DarkGray -NoNewline
+    Write-Host "📁  PROJECT" -ForegroundColor Green -NoNewline
+    Write-Host "                │" -ForegroundColor DarkGray
+    Write-Host "  │                             │                             │" -ForegroundColor DarkGray
+    Write-Host "  │  Ralph's brain              │  Your code                  │" -ForegroundColor DarkGray
+    Write-Host "  │  Rules · Tools · Memory     │  Isolated · Clean · Fast    │" -ForegroundColor DarkGray
+    Write-Host "  │  $CORE_PATH" -ForegroundColor DarkGray -NoNewline
+    Write-Host "│  Any project you choose      │" -ForegroundColor DarkGray
+    Write-Host "  │                             │                             │" -ForegroundColor DarkGray
+    Write-Host "  └─────────────────────────────┴─────────────────────────────┘" -ForegroundColor DarkGray
+    Write-Host ""
+}
 
-if (-not $ProjectPath) {
-    Show-RecentProjects
-    Show-CapabilitySummary
+# ═══════════════════════════════════════════
+# MODE: SELF
+# ═══════════════════════════════════════════
 
-    Write-Host "  Select project:" -ForegroundColor White
-    Write-Host "    [number] — Recent project by index" -ForegroundColor DarkGray
-    Write-Host "    [path]   — Existing or NEW project path" -ForegroundColor DarkGray
-    Write-Host "    [.]      — Current directory: $(Get-Location)" -ForegroundColor DarkGray
-    Write-Host "    [self]   — Ralph's core system ($CORE_PATH)" -ForegroundColor DarkGray
-    Write-Host "    [empty]  — Use current directory" -ForegroundColor DarkGray
+function Invoke-SelfMode {
+    Write-Host "  🧠 SELF MODE — Entering Ralph's Brain" -ForegroundColor Yellow
+    Write-Host "  📂 $CORE_PATH" -ForegroundColor Yellow
+    Write-Host ""
+
+    Add-Recent $CORE_PATH
+    Set-Location $CORE_PATH
+    claude
+}
+
+# ═══════════════════════════════════════════
+# MODE: PROJECT
+# ═══════════════════════════════════════════
+
+function Invoke-ProjectMode {
+    param([string]$ProjectPath)
+    Write-Host "  📁 PROJECT MODE" -ForegroundColor Green
+
+    $projClaudeMd = Join-Path $ProjectPath "CLAUDE.md"
+    if (Test-Path $projClaudeMd) { Write-Host "  📄 CLAUDE.md found" -ForegroundColor DarkGray }
+    Write-Host "  📂 $ProjectPath" -ForegroundColor Green
+    Write-Host ""
+
+    if ($ProjectPath -ne $CORE_PATH) { Add-Recent $ProjectPath }
+    Set-Location $ProjectPath
+    claude
+}
+
+# ═══════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════
+
+# Fast paths: CLI shortcuts
+if ($List) { Show-Header; Show-Recent; exit 0 }
+
+if ($Self) {
+    Show-Header
+    Invoke-SelfMode
+    exit 0
+}
+
+if ($Path) {
+    Show-Header
+    if (Test-Path $Path) {
+        $resolved = (Resolve-Path $Path).Path
+        try { $gitRoot = git -C $resolved rev-parse --show-toplevel 2>$null; if ($gitRoot) { $resolved = $gitRoot } } catch {}
+        Invoke-ProjectMode $resolved
+    } else {
+        Write-Host "  🆕 New project: $Path" -ForegroundColor Yellow
+        $create = Read-Host "  Create? [Y/n]"
+        if ($create -eq 'n') { exit 0 }
+        New-Item -ItemType Directory -Force $Path | Out-Null
+        $resolved = (Resolve-Path $Path).Path
+        New-Project $resolved
+        Invoke-ProjectMode $resolved
+    }
+    exit 0
+}
+
+# ── Interactive Mode ──
+Show-Header
+Show-ModeChoice
+
+# Read last mode for hint
+$state = Load-State
+$lastHint = if ($state.last_mode) { " [last: $($state.last_mode)]" } else { "" }
+
+$mode = Read-Host "  Enter mode${lastHint}: [self] or [project]"
+
+if ($mode -eq 'self' -or $mode -eq 's') {
+    $state.last_mode = "self"; Save-State $state
+    Invoke-SelfMode
+    exit 0
+}
+
+if ($mode -eq 'project' -or $mode -eq 'p' -or $mode -eq '') {
+    $state.last_mode = "project"; Save-State $state
+
+    Clear-Host
+    Show-Header
+    Show-Recent
+
+    $recent = Get-Recent
+    Write-Host "  ── Project Selection ──" -ForegroundColor White
+    Write-Host "    [0-7]  Pick recent project" -ForegroundColor DarkGray
+    Write-Host "    [path]  Existing or new project directory" -ForegroundColor DarkGray
+    Write-Host "    [.]     Current directory: $(Get-Location)" -ForegroundColor DarkGray
+    Write-Host "    [back]  Return to mode selection" -ForegroundColor DarkGray
     Write-Host ""
 
     $choice = Read-Host "  Project"
 
-    if ($choice -eq 'self') {
-        $ProjectPath = $CORE_PATH
-        Write-Host "  🔧 SELF mode" -ForegroundColor Yellow
-    } elseif ($choice -eq '.' -or $choice -eq '') {
-        $ProjectPath = (Get-Location).Path
-        Write-Host "  📁 Current directory: $ProjectPath" -ForegroundColor Green
-    } elseif ($choice -match '^\d+$') {
-        # Number = recent project index
-        $recent = @()
-        if (Test-Path $RECENT_FILE) {
-            try { $recent = Get-Content $RECENT_FILE -Raw | ConvertFrom-Json } catch {}
-        }
+    if ($choice -eq 'back' -or $choice -eq 'b') {
+        # Recurse: restart interactive
+        & $PSCommandPath
+        exit 0
+    }
+
+    if ($choice -eq '.' -or $choice -eq '') {
+        $target = (Get-Location).Path
+        try { $gitRoot = git -C $target rev-parse --show-toplevel 2>$null; if ($gitRoot) { $target = $gitRoot } } catch {}
+        Invoke-ProjectMode $target
+        exit 0
+    }
+
+    if ($choice -match '^\d+$') {
         $idx = [int]$choice
-        if ($idx -lt $recent.Count -and (Test-Path $recent[$idx])) {
-            $ProjectPath = $recent[$idx]
-            Write-Host "  📁 Recent project: $ProjectPath" -ForegroundColor Green
-        } else {
-            Write-Host "  ❌ Invalid index or path no longer exists" -ForegroundColor Red
-            exit 1
-        }
-    } elseif (Test-Path $choice) {
-        $ProjectPath = (Resolve-Path $choice).Path
-        Write-Host "  📁 $ProjectPath" -ForegroundColor Green
-    } else {
-        # Path doesn't exist — offer to create new project
-        Write-Host "  🆕 Path does not exist: $choice" -ForegroundColor Yellow
-        $create = Read-Host "  Create new project here? [Y/n]"
-        if ($create -ne 'n') {
-            New-Item -ItemType Directory -Force $choice | Out-Null
-            $ProjectPath = (Resolve-Path $choice).Path
-            Initialize-Project $ProjectPath
-        } else {
+        if ($idx -lt $recent.Count) {
+            Invoke-ProjectMode $recent[$idx]
             exit 0
         }
+        Write-Host "  ❌ Invalid index" -ForegroundColor Red
+        exit 1
     }
+
+    if (Test-Path $choice) {
+        $target = (Resolve-Path $choice).Path
+        try { $gitRoot = git -C $target rev-parse --show-toplevel 2>$null; if ($gitRoot) { $target = $gitRoot } } catch {}
+        Invoke-ProjectMode $target
+        exit 0
+    }
+
+    # Doesn't exist — offer to create
+    Write-Host "  🆕 New project: $choice" -ForegroundColor Yellow
+    $create = Read-Host "  Create & initialize? [Y/n]"
+    if ($create -eq 'n') { exit 0 }
+    New-Item -ItemType Directory -Force $choice | Out-Null
+    $target = (Resolve-Path $choice).Path
+    New-Project $target
+    Invoke-ProjectMode $target
+    exit 0
 }
 
-# ── Validate & Prepare ──
-
-if (-not (Test-Path $ProjectPath)) {
-    Write-Host "  ❌ Invalid path: $ProjectPath" -ForegroundColor Red
-    exit 1
-}
-
-# Resolve to absolute
-$ProjectPath = (Resolve-Path $ProjectPath).Path
-
-# Check if it's a git repo — if so, go to root
-try {
-    $gitRoot = git -C $ProjectPath rev-parse --show-toplevel 2>$null
-    if ($gitRoot) {
-        $ProjectPath = $gitRoot
-    }
-} catch {}
-
-# Save to recent
-Save-RecentProject $ProjectPath
-
-# ═══ Launch ═══
-
-Write-Host ""
-Write-Host "  ═══════════════════════════════════════" -ForegroundColor Cyan
-
-$isSelf = ($ProjectPath -eq $CORE_PATH)
-if ($isSelf) {
-    Write-Host "  🧠 RALPH SELF MODE" -ForegroundColor Yellow
-    Write-Host "  Working on agent core system" -ForegroundColor Yellow
-} else {
-    Write-Host "  📁 PROJECT MODE" -ForegroundColor Green
-
-    # Check for project CLAUDE.md
-    $projectClaudeMd = Join-Path $ProjectPath "CLAUDE.md"
-    $projectAgentsMd = Join-Path $ProjectPath "AGENTS.md"
-    $projectConventions = Join-Path $ProjectPath "CONVENTIONS.md"
-
-    if (Test-Path $projectClaudeMd) {
-        Write-Host "  📄 Project CLAUDE.md found" -ForegroundColor DarkGray
-    } else {
-        Write-Host "  💡 Tip: Create CLAUDE.md in project root for project-specific rules" -ForegroundColor DarkGray
-    }
-}
-
-Write-Host "  📂 $ProjectPath" -ForegroundColor White
-Write-Host "  ═══════════════════════════════════════" -ForegroundColor Cyan
-Write-Host ""
-
-# Navigate to project
-Set-Location $ProjectPath
-
-# Launch Claude Code
-claude
+Write-Host "  ❌ Invalid mode. Use: self / project" -ForegroundColor Red
+exit 1
