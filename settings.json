@@ -24,7 +24,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-safety.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       },
@@ -34,7 +34,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\read-before-edit.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       }
@@ -46,7 +46,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\track-reads.ps1\"",
-            "timeout": 1,
+            "timeout": 0.2,
             "runInBackground": true
           }
         ]
@@ -90,12 +90,12 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
-            "timeout": 1
+            "timeout": 0.2
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\echo-of-prompt.ps1\" -prompt \"${prompt}\"",
-            "timeout": 2
+            "timeout": 0.2
           }
         ]
       },
@@ -114,7 +114,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-distill.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           },
           {
             "type": "command",
@@ -130,7 +130,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       }
@@ -141,18 +141,18 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-sediment.ps1\"",
-            "timeout": 1
+            "timeout": 0.3
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\quick-evolve.ps1\"",
-            "timeout": 1,
+            "timeout": 0.2,
             "runInBackground": true
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\loop-guard.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       }
@@ -163,12 +163,18 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-snapshot.ps1\" -Message \"session-end\"",
-            "timeout": 2
+            "timeout": 0.5
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\session-end.ps1\"",
             "timeout": 5
+          },
+          {
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\metacog-bridge.ps1\"",
+            "timeout": 3,
+            "type": "command",
+            "runInBackground": true
           }
         ]
       }
@@ -179,7 +185,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-stop.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       }
@@ -224,7 +230,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-start.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       }
