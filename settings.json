@@ -200,5 +200,6 @@
       "url": "http://localhost:3001/sse"
     }
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true 
 }
+
