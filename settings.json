@@ -30,9 +30,30 @@
             "timeout": 1
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\read-before-edit.ps1\"",
+            "timeout": 2
+          }
+        ]
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\track-reads.ps1\"",
+            "timeout": 2,
+            "runInBackground": true
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [
