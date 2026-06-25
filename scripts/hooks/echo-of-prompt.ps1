@@ -28,7 +28,7 @@ if (-not (Test-Path $taskFile) -and $prompt -and $prompt.Length -gt 10) {
 
 if (-not (Test-Path $taskFile)) {
     @{ count = $count; last_echo = $lastEcho } | ConvertTo-Json | Set-Content $stateFile -Encoding UTF8
-    exit 0
+    _p 0; exit 0
 }
 
 $taskContext = Get-Content $taskFile -Raw -Encoding UTF8

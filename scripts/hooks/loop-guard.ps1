@@ -55,4 +55,4 @@ $block = @{
     reason = "[LOOP #$($state.iteration)] $task"
 } | ConvertTo-Json -Compress
 Write-Output $block
-exit 0
+_p 0; exit 0
