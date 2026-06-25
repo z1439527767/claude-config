@@ -40,11 +40,12 @@ def log_heal(action, target, result, detail=""):
         "result": result,
         "detail": detail,
     }
-    HEAL_LOG.parent.mkdir(parents=True, exist_ok=True)
-    with open(HEAL_LOG, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    try: write_log("auto_heal", None, entry)
-    except Exception: pass
+    try:
+        write_log("auto_heal", None, entry)
+    except Exception:
+        HEAL_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with open(HEAL_LOG, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
 
 def run_verify():
     """Run verify-all and return parsed results."""

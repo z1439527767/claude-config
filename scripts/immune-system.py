@@ -175,10 +175,11 @@ def log_threat(threat_type, detail, severity="medium", handled=True):
         "severity": severity,
         "handled": handled,
     }
-    with open(THREAT_LOG, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    try: write_log("threat_log", None, entry)
-    except Exception: pass
+    try:
+        write_log("threat_log", None, entry)
+    except Exception:
+        with open(THREAT_LOG, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
 
 
 # ═══════════════════════════════════════════

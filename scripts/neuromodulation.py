@@ -91,10 +91,11 @@ def log_outcome(action_type, outcome, context, detail=""):
         "context": context[:300],
         "detail": detail[:200],
     }
-    with open(OUTCOMES_FILE, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    try: write_log("outcome_log", None, entry)
-    except Exception: pass
+    try:
+        write_log("outcome_log", None, entry)
+    except Exception:
+        with open(OUTCOMES_FILE, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
     return entry
 
 # ── Neuromodulator Update ──
