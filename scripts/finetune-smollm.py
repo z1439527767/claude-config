@@ -16,7 +16,7 @@ HOME = Path(__file__).resolve().parent.parent
 MODEL_DIR = Path(os.environ.get("RALPH_MODEL_DIR", r"C:\Users\z1439\OneDrive\Desktop\模型"))
 OUTPUT_DIR = MODEL_DIR / "ralph-smollm-v1"
 BRAIN_DATA = MODEL_DIR / "brain_dataset.jsonl"
-BASE_MODEL = "HuggingFaceTB/SmolLM2-135M"
+BASE_MODEL = "Qwen/Qwen2.5-0.5B"
 
 def load_dataset():
     if not BRAIN_DATA.exists():
@@ -92,10 +92,12 @@ def train():
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
     model.train()
+    if device == "cuda":
+        model.gradient_checkpointing_enable()
 
     # Training setup
-    batch_size = 4 if device == "cuda" else 1
-    epochs = 3
+    batch_size = 2 if device == "cuda" else 1
+    epochs = 6
     lr = 2e-4
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     num_batches = math.ceil(len(input_ids) / batch_size)
