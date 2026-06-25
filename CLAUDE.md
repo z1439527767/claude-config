@@ -38,4 +38,4 @@
 
 ## 7. 记忆 & 协作
 @.claude/rules/memory.md
-@../AGENTS.md
+@AGENTS.md

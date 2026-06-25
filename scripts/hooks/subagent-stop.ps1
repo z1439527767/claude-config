@@ -26,7 +26,11 @@ if (Test-Path $subagentLog) {
     $recentCount = (Get-Content $subagentLog -Tail 100 -ErrorAction SilentlyContinue | Where-Object { $_ }).Count
 }
 
-# If 10+ subagents in a session with short output (<100 chars), flag inefficiency
+# Pipeline gate: validate subagent output quality before parent receives it
+$resultLength = if ($agentResult) { $agentResult.Length } else { 0 }
+if ($resultLength -gt 0 -and $resultLength -lt 50) {
+    Write-Output "SUBAGENT GATE: subagent returned only $resultLength chars — possible incomplete work"
+}
 if ($recentCount -ge 10) {
     $shortOutputs = (Get-Content $subagentLog -Tail 20 -ErrorAction SilentlyContinue |
         ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } |
