@@ -25,6 +25,7 @@
 @.claude/rules/self-review.md  — 自审查：改完过 4 问 + 跨模型审查（64.5% 盲点）
 @.claude/rules/communication.md — 通信：用户语言回复，不输出纯计划，不叫用户做事
 @.claude/rules/execution.md    — 执行纪律：野心vs精度、信心评分、错误恢复、状态摘要
+@.claude/rules/problem-solving.md — 问题解决：OODA 循环、升级链、反模式、性能时钟
 @.claude/rules/context.md      — 上下文纪律：<60% 安全线、剪枝 Rubric、越少越好
 @.claude/rules/security.md     — 安全边界：deny-first、不可信输入、guardrails=代码
 
