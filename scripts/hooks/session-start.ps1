@@ -97,6 +97,24 @@ $narrativeInject = python3 "$baseDir\scripts\narrative-engine.py" --inject 2>$nu
 if ($LASTEXITCODE -eq 0 -and $narrativeInject) { $ctxLines += "`n$narrativeInject" }
 
 # ═══════════════════════════════════════════
+# PHASE 6b: Salience — Attention gate status
+# ═══════════════════════════════════════════
+$salienceInject = python3 "$baseDir\scripts\salience-gate.py" --inject 2>$null
+if ($LASTEXITCODE -eq 0 -and $salienceInject) { $ctxLines += "`n$salienceInject" }
+
+# ═══════════════════════════════════════════
+# PHASE 6c: Interoception — Internal state
+# ═══════════════════════════════════════════
+$interoInject = python3 "$baseDir\scripts\interoception.py" --inject 2>$null
+if ($LASTEXITCODE -eq 0 -and $interoInject) { $ctxLines += "`n$interoInject" }
+
+# ═══════════════════════════════════════════
+# PHASE 6d: Neuromodulation — Reward learning
+# ═══════════════════════════════════════════
+$neuroInject = python3 "$baseDir\scripts\neuromodulation.py" --inject 2>$null
+if ($LASTEXITCODE -eq 0 -and $neuroInject) { $ctxLines += "`n$neuroInject" }
+
+# ═══════════════════════════════════════════
 # PHASE 7: CLAUDE.local.md Context
 # ═══════════════════════════════════════════
 $localMd = "$baseDir\CLAUDE.local.md"
