@@ -297,9 +297,18 @@ if ($claudeContent -and $agentsContent) {
     }
 }
 
-# 5c: Error pattern learning from tool_failures
+# 5c: Error pattern learning from tool_failures (deduped — skip if same as last report)
 $failureDir = "$env:USERPROFILE\.claude\.claude\tool_failures"
 if (Test-Path $failureDir) {
+    # Load last evo changes for dedup
+    $lastChanges = @()
+    if (Test-Path $evolveLog) {
+        try {
+            $lastLine = Get-Content $evolveLog -Tail 1 -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($lastLine) { $lastEntry = $lastLine | ConvertFrom-Json; $lastChanges = @($lastEntry.changes) }
+        } catch { }
+    }
+
     Get-ChildItem $failureDir -File -Filter "failures.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
         $failures = Get-Content $_.FullName -Tail 50 -ErrorAction SilentlyContinue |
             ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ }
@@ -315,7 +324,8 @@ if (Test-Path $failureDir) {
 
         $hotTools = $toolCounts.GetEnumerator() | Where-Object { $_.Value -ge 3 } | Sort-Object Value -Descending
         foreach ($ht in $hotTools) {
-            $changes += "L5: '$($ht.Name)' failed $($ht.Value) times — consider adding retry or fallback"
+            $obs = "L5: '$($ht.Name)' failed $($ht.Value) times — consider adding retry or fallback"
+            if ($obs -notin $lastChanges) { $changes += $obs }
         }
     }
 }
