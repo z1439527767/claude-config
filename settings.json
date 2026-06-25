@@ -146,7 +146,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-snapshot.ps1\" -Message \"session-end\"",
-            "timeout": 5
+            "timeout": 2
           },
           {
             "type": "command",
