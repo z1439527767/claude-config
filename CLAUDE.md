@@ -39,6 +39,15 @@
 - EFFECT：改动有实际效果？（exit code / 文件内容变化）
 - SIDE：有无意外副作用？（关联文件是否被误改）
 
+## 4.7. 不重复造轮子
+**改之前先查：现有机制能不能直接用？**
+- 加新 hook 前 → 检查 settings.json 是否已有同类 hook
+- 加新脚本前 → 检查 scripts/hooks/ 是否已有类似脚本
+- 加新 agent 前 → 检查 .claude/agents/ 是否已有类似 agent
+- 加新 skill 前 → 检查 .claude/skills/ 是否已有类似 skill
+- 加新规则前 → 检查 CLAUDE.md + AGENTS.md + rules/ 是否已有类似规则
+- 复用的优先级：现有配置 > 现有脚本 > 现有 hook > 新建
+
 ## 5. 改行为只改这三个文件
 settings.json、CLAUDE.md、AGENTS.md。用户纠正同一问题两次 → 立即写入对应文件。不让同一个错犯第三次。
 
