@@ -7,11 +7,15 @@
 #   adapter-insight.ps1 -All         → full insight report
 #   adapter-insight.ps1 -TopN 5      → top N issues to fix now
 param([switch]$Friction, [switch]$Failures, [switch]$Evolution, [switch]$All, [int]$TopN = 5)
+$ErrorActionPreference = "Continue"
+$baseDir = "$env:USERPROFILE\.claude"
+. "$baseDir\scripts\lib\dblog.ps1"
 
 $ErrorActionPreference = "Continue"
 $baseDir = "$env:USERPROFILE\.claude"
 
 function Get-JsonLines($path) {
+    # Fallback: read from JSONL file (used when DB unavailable)
     if (Test-Path $path) {
         Get-Content $path -ErrorAction SilentlyContinue | Where-Object { $_ -ne "" } | ForEach-Object {
             try { $_ | ConvertFrom-Json } catch { $null }
@@ -19,10 +23,25 @@ function Get-JsonLines($path) {
     }
 }
 
+function Get-Events($source, [int]$tail = 500) {
+    # SQLite-first, JSONL fallback
+    $dbResult = Read-DbLog -Source $source -Tail $tail -AsJson
+    if ($dbResult) { return $dbResult }
+    # Map source to JSONL path for fallback
+    $paths = @{
+        "friction/events" = "$baseDir\.claude\tellonce-state\friction\events.jsonl"
+        "tool_failures" = "$baseDir\.claude\tool_failures\failures.jsonl"
+        "evolution_log" = "$baseDir\.claude\evolution_log.jsonl"
+    }
+    $path = $paths[$source]
+    if ($path) { return @(Get-JsonLines $path) }
+    return @()
+}
+
 # ═══ Friction Analysis ═══
 if ($Friction -or $All) {
     Write-Output "═══ FRICTION PATTERNS ═══`n"
-    $events = Get-JsonLines "$baseDir\.claude\tellonce-state\friction\events.jsonl"
+    $events = Get-Events "friction/events"
 
     if ($events.Count -eq 0) {
         Write-Output "  No friction events recorded.`n"
@@ -55,7 +74,7 @@ if ($Friction -or $All) {
 # ═══ Failure Analysis ═══
 if ($Failures -or $All) {
     Write-Output "═══ TOOL FAILURE PATTERNS ═══`n"
-    $failures = @(Get-JsonLines "$baseDir\.claude\tool_failures\failures.jsonl")
+    $failures = @(Get-Events "tool_failures")
 
     if ($failures.Count -eq 0) {
         Write-Output "  No tool failures recorded.`n"
@@ -74,7 +93,7 @@ if ($Failures -or $All) {
 # ═══ Evolution Effectiveness ═══
 if ($Evolution -or $All) {
     Write-Output "═══ EVOLUTION EFFECTIVENESS ═══`n"
-    $evos = Get-JsonLines "$baseDir\.claude\evolution_log.jsonl"
+    $evos = Get-Events "evolution_log"
 
     if ($evos.Count -eq 0) {
         Write-Output "  No evolution events recorded.`n"
@@ -106,7 +125,7 @@ if ($All) {
     $issues = @()
 
     # Check for repeated failures
-    $failures = @(Get-JsonLines "$baseDir\.claude\tool_failures\failures.jsonl")
+    $failures = @(Get-Events "tool_failures")
     if ($failures.Count -gt 0) {
         $byTool = $failures | Group-Object tool | Sort-Object Count -Descending
         foreach ($t in $byTool | Select-Object -First 2) {

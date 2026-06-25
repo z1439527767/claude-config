@@ -5,6 +5,7 @@ param([switch]$Json, [switch]$Brief)
 
 $ErrorActionPreference = "Continue"
 $baseDir = "$env:USERPROFILE\.claude"
+. "$baseDir\scripts\lib\dblog.ps1"  # SQLite log adapter
 
 # ═══ 1. Health ═══
 $health = @{ ok = $true; issues = @() }
@@ -38,16 +39,26 @@ $hookFiles = @(Get-ChildItem $hookDir -Filter "*.ps1" -ErrorAction SilentlyConti
 $libFiles = @(Get-ChildItem "$baseDir\scripts\lib" -Filter "*.ps1" -ErrorAction SilentlyContinue).Count
 
 # ═══ 2. Evolution ═══
-$evoLog = "$baseDir\.claude\evolution_log.jsonl"
 $lastEvo = $null; $evo24h = 0
-if (Test-Path $evoLog) {
-    $lines = @(Get-Content $evoLog -Tail 20 -ErrorAction SilentlyContinue | Where-Object { $_ })
-    if ($lines.Count -gt 0) {
-        try { $lastEvo = ($lines[-1] | ConvertFrom-Json) } catch {}
+# Try SQLite first
+$dbEvo = Read-DbLog -Source "evolution_log" -Tail 20
+if ($dbEvo -and $dbEvo.items) {
+    $lines = $dbEvo.items
+    $lastEvo = $lines[0]
+    $cutoff = (Get-Date).AddHours(-24).ToString("o")
+    $evo24h = ($lines | Where-Object { $_.timestamp -gt $cutoff }).Count
+} else {
+    # Fallback to JSONL
+    $evoLog = "$baseDir\.claude\evolution_log.jsonl"
+    if (Test-Path $evoLog) {
+        $lines = @(Get-Content $evoLog -Tail 20 -ErrorAction SilentlyContinue | Where-Object { $_ })
+        if ($lines.Count -gt 0) {
+            try { $lastEvo = ($lines[-1] | ConvertFrom-Json) } catch {}
+        }
+        $evo24h = ($lines | ForEach-Object {
+            try { ([datetime]($_ | ConvertFrom-Json).timestamp) } catch { $null }
+        } | Where-Object { $_ -and ($_ -gt (Get-Date).AddHours(-24)) }).Count
     }
-    $evo24h = ($lines | ForEach-Object {
-        try { ([datetime]($_ | ConvertFrom-Json).timestamp) } catch { $null }
-    } | Where-Object { $_ -and ($_ -gt (Get-Date).AddHours(-24)) }).Count
 }
 
 $evoGate = "$baseDir\.claude\evo_gate.json"
@@ -85,20 +96,31 @@ if (Test-Path $memTree) {
 }
 
 # ═══ 4. Friction & Failures ═══
-$frictionDir = "$baseDir\.claude\tellonce-state\friction"
+$cutoff24h = (Get-Date).AddHours(-24).ToString("o")
 $friction24h = 0
-if (Test-Path "$frictionDir\events.jsonl") {
-    $friction24h = @(Get-Content "$frictionDir\events.jsonl" -ErrorAction SilentlyContinue | Where-Object {
-        try { ([datetime]($_ | ConvertFrom-Json).timestamp) -gt (Get-Date).AddHours(-24) } catch { $false }
-    }).Count
+$dbFric = Read-DbLog -Source "friction/events" -Tail 200
+if ($dbFric -and $dbFric.items) {
+    $friction24h = ($dbFric.items | Where-Object { $_.timestamp -gt $cutoff24h }).Count
+} else {
+    $frictionDir = "$baseDir\.claude\tellonce-state\friction"
+    if (Test-Path "$frictionDir\events.jsonl") {
+        $friction24h = @(Get-Content "$frictionDir\events.jsonl" -ErrorAction SilentlyContinue | Where-Object {
+            try { ([datetime]($_ | ConvertFrom-Json).timestamp) -gt (Get-Date).AddHours(-24) } catch { $false }
+        }).Count
+    }
 }
 
 $failures24h = 0
-$failureDir = "$baseDir\.claude\tool_failures"
-if (Test-Path "$failureDir\failures.jsonl") {
-    $failures24h = @(Get-Content "$failureDir\failures.jsonl" -ErrorAction SilentlyContinue | Where-Object {
-        try { ([datetime]($_ | ConvertFrom-Json).timestamp) -gt (Get-Date).AddHours(-24) } catch { $false }
-    }).Count
+$dbFail = Read-DbLog -Source "tool_failures" -Tail 200
+if ($dbFail -and $dbFail.items) {
+    $failures24h = ($dbFail.items | Where-Object { $_.timestamp -gt $cutoff24h }).Count
+} else {
+    $failureDir = "$baseDir\.claude\tool_failures"
+    if (Test-Path "$failureDir\failures.jsonl") {
+        $failures24h = @(Get-Content "$failureDir\failures.jsonl" -ErrorAction SilentlyContinue | Where-Object {
+            try { ([datetime]($_ | ConvertFrom-Json).timestamp) -gt (Get-Date).AddHours(-24) } catch { $false }
+        }).Count
+    }
 }
 
 # ═══ 5. Pending ═══
@@ -110,14 +132,25 @@ $activeTask = "$baseDir\.claude\active_task.md"
 $hasActiveTask = Test-Path $activeTask
 
 # ═══ 6. Performance ═══
-$perfDir = "$baseDir\.claude\hook_perf"
 $slowHooks = @()
-if (Test-Path $perfDir) {
-    Get-ChildItem $perfDir -File -Filter "*.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
-        $last = Get-Content $_.FullName -Tail 5 -ErrorAction SilentlyContinue | Where-Object { $_ } | ForEach-Object {
-            try { $_ | ConvertFrom-Json } catch { $null }
-        } | Where-Object { $_.duration_ms -gt 2000 }
-        if ($last) { $slowHooks += "$($_.BaseName): $($last.duration_ms)ms" }
+# Try SQLite first — single query for all hook_perf
+$dbPerf = Read-DbLog -Source "hook_perf" -Tail 250 -AsJson
+if ($dbPerf) {
+    $recentPerf = $dbPerf | Where-Object { $_.d -gt 2000 }
+    $byHook = $recentPerf | Group-Object { $_.h }
+    foreach ($h in $byHook) {
+        $slowHooks += "$($h.Name): $($h.Group[0].d)ms"
+    }
+} else {
+    # Fallback to JSONL directory scan
+    $perfDir = "$baseDir\.claude\hook_perf"
+    if (Test-Path $perfDir) {
+        Get-ChildItem $perfDir -File -Filter "*.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
+            $last = Get-Content $_.FullName -Tail 5 -ErrorAction SilentlyContinue | Where-Object { $_ } | ForEach-Object {
+                try { $_ | ConvertFrom-Json } catch { $null }
+            } | Where-Object { $_.d -gt 2000 }
+            if ($last) { $slowHooks += "$($_.BaseName): $($last.d)ms" }
+        }
     }
 }
 
