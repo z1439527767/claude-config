@@ -4,8 +4,6 @@
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
     "DEEPSEEK_DEFAULT_MODEL": "deepseek-v4-pro",
     "DEEPSEEK_MODEL": "deepseek-v4-pro",
-    "CLAUDE_CODE_DEFAULT_EFFORT": "high",
-    "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
     "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
     "CLAUDE_AUTOCOMPACT_PCT": "70",
     "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16000",
@@ -13,7 +11,6 @@
     "CLAUDE_CODE_RESUME_INTERRUPTED_TURN": "1",
     "CLAUDE_CODE_GLOB_HIDDEN": "false",
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
-    "MAX_THINKING_TOKENS": "16000",
     "CLAUDE_CODE_ARTIFACT_AUTO_OPEN": "0"
   },
   "permissions": {
@@ -175,6 +172,17 @@
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\precompact-guard.ps1\"",
             "timeout": 3
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\post-compact-reload.ps1\"",
+            "timeout": 2
           }
         ]
       }
