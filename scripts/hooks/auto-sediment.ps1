@@ -3,8 +3,7 @@ param()
 
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
-$sw = [Diagnostics.Stopwatch]::StartNew()
-function Write-PerfLog($c) { $d="$env:USERPROFILE\.claude\.claude\hook_perf"; if(-not(Test-Path $d)){mkdir -Force $d|Out-Null}; @{t=(Get-Date -Format "o");h="auto-sediment";d=$sw.ElapsedMilliseconds;e=$c}|ConvertTo-Json -Compress|Add-Content "$d\auto-sediment.jsonl" -Encoding UTF8 }
+$perfHookName = "auto-sediment"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 if ($env:STOP_HOOK_ACTIVE -eq "1") { Write-PerfLog 0; exit 0 }
 
