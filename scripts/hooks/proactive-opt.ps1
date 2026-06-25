@@ -46,24 +46,16 @@ $settingsJson = "$base\settings.json"
 if (Test-Path $perfDir) {
     try { $settings = Get-Content $settingsJson -Raw | ConvertFrom-Json } catch { $settings = $null }
     if ($settings) {
-        Get-ChildItem $perfDir -File -Filter "*.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
-            $hookN = $_.BaseName
-            $lines = Get-Content $_.FullName -Tail 50 -ErrorAction SilentlyContinue | Where-Object { $_ }
-            $entries = @($lines | ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ })
-            if ($entries.Count -lt 10) { return }
-            $durations = @($entries | ForEach-Object {
-                if ($_.duration_ms) { [int]$_.duration_ms } elseif ($_.d) { [int]$_.d } else { 0 }
-            } | Where-Object { $_ -gt 0 })
-            if ($durations.Count -lt 10) { return }
-            $avgMs = ($durations | Measure-Object -Average).Average
-
+        $metrics = Get-HookPerfMetrics -PerfDir $perfDir -Tail 50
+        foreach ($hookN in $metrics.Keys) {
+            $m = $metrics[$hookN]
             foreach ($eventName in $settings.hooks.PSObject.Properties.Name) {
                 foreach ($group in $settings.hooks.$eventName) {
                     foreach ($h in $group.hooks) {
                         if ($h.command -match [regex]::Escape($hookN)) {
                             $timeoutMs = [int]$h.timeout * 1000
-                            if ($avgMs -gt 0 -and $timeoutMs / $avgMs -gt 10) {
-                                $suggestions += "$hookN timeout $($h.timeout)s vs avg ${avgMs:N0}ms — 10x+ waste"
+                            if ($m.avgMs -gt 0 -and $timeoutMs / $m.avgMs -gt 10) {
+                                $suggestions += "$hookN timeout $($h.timeout)s vs avg $($m.avgMs.ToString('N0'))ms — 10x+ waste"
                             }
                         }
                     }

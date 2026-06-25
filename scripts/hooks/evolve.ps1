@@ -198,21 +198,9 @@ if (Test-Path $perfDir) {
     $settings = Get-Content $settingsJson -Raw | ConvertFrom-Json
     $settingsModified = $false
 
-    Get-ChildItem $perfDir -File -Filter "*.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
-        $hookN = $_.BaseName
-        $lines = Get-Content $_.FullName -Tail 50 -ErrorAction SilentlyContinue | Where-Object { $_ }
-        $entries = @($lines | ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ })
-        if ($entries.Count -lt 10) { return }
-
-        $durations = @($entries | ForEach-Object {
-            if ($_.duration_ms) { [int]$_.duration_ms }
-            elseif ($_.d) { [int]$_.d }
-            else { 0 }
-        } | Where-Object { $_ -gt 0 })
-        if ($durations.Count -lt 10) { return }
-
-        $avgMs = ($durations | Measure-Object -Average).Average
-        $maxMs = ($durations | Measure-Object -Maximum).Maximum
+    $metrics = Get-HookPerfMetrics -PerfDir $perfDir -Tail 50
+    foreach ($hookN in $metrics.Keys) {
+        $m = $metrics[$hookN]
 
         # Find and update timeout in settings.json
         $found = $false
@@ -223,12 +211,12 @@ if (Test-Path $perfDir) {
                     if ($h.command -match [regex]::Escape($hookN)) {
                         $oldT = [int]$h.timeout
                         # New timeout = avg * 3 converted to seconds, bounded [1, 30]
-                        $newT = [math]::Max(1, [math]::Min(30, [int]($avgMs / 1000 * 3 + 1)))
+                        $newT = [math]::Max(1, [math]::Min(30, [int]($m.avgMs / 1000 * 3 + 1)))
 
                         # Only change if difference is substantial (>30%)
                         if ([math]::Abs($newT - $oldT) / [math]::Max(1, $oldT) -gt 0.3) {
                             $h.timeout = $newT
-                            $applied += "L3: $hookN timeout ${oldT}s → ${newT}s (avg ${avgMs:N0}ms, max ${maxMs}ms)"
+                            $applied += "L3: $hookN timeout ${oldT}s → ${newT}s (avg $($m.avgMs.ToString('N0'))ms, max $($m.maxMs)ms)"
                             $settingsModified = $true
                         }
                         $found = $true

@@ -24,20 +24,10 @@ try { $settings = Get-Content $settingsJson -Raw | ConvertFrom-Json } catch { Wr
 $tuned = @()
 $settingsModified = $false
 
-Get-ChildItem $perfDir -File -Filter "*.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
-    $hookN = $_.BaseName
-    $lines = Get-Content $_.FullName -Tail 30 -ErrorAction SilentlyContinue | Where-Object { $_ }
-    $entries = @($lines | ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ })
-    if ($entries.Count -lt 10) { return }
-
-    $durations = @($entries | ForEach-Object {
-        if ($_.duration_ms) { [int]$_.duration_ms } elseif ($_.d) { [int]$_.d } else { 0 }
-    } | Where-Object { $_ -gt 0 })
-    if ($durations.Count -lt 10) { return }
-
-    $avgMs = ($durations | Measure-Object -Average).Average
-    $maxMs = ($durations | Measure-Object -Maximum).Maximum
-    if ($avgMs -lt 50) { return }  # Too fast to need tuning
+$metrics = Get-HookPerfMetrics -PerfDir $perfDir -Tail 30
+foreach ($hookN in $metrics.Keys) {
+    $m = $metrics[$hookN]
+    if ($m.avgMs -lt 50) { continue }  # Too fast to need tuning
 
     # Find and tune
     foreach ($eventName in $settings.hooks.PSObject.Properties.Name) {
@@ -45,7 +35,7 @@ Get-ChildItem $perfDir -File -Filter "*.jsonl" -ErrorAction SilentlyContinue | F
             foreach ($h in $group.hooks) {
                 if ($h.command -match [regex]::Escape($hookN)) {
                     $oldT = [int]$h.timeout
-                    $newT = [math]::Max(1, [math]::Min(30, [int]($avgMs / 1000 * 3 + 1)))
+                    $newT = [math]::Max(1, [math]::Min(30, [int]($m.avgMs / 1000 * 3 + 1)))
                     if ([math]::Abs($newT - $oldT) / [math]::Max(1, $oldT) -gt 0.3) {
                         # Quick-evo is more conservative: only tune downwards, never increase
                         if ($newT -lt $oldT) {
