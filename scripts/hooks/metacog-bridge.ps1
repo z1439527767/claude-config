@@ -54,7 +54,7 @@ if (Test-Path $frictionDir) {
             $lesson = if ($catLessonMap.ContainsKey($topCat.Name)) { $catLessonMap[$topCat.Name] } else { "Friction category '$($topCat.Name)' triggered $($topCat.Value) times in 24h." }
             $script:learnings += @{
                 pattern = "friction_$($topCat.Name)"; type = "detection"; category = "User Friction"
-                lesson = $lesson; detected_at = $now.ToString("o"); session_turn_count = if ($state.turn_count) { [int]$state.turn_count } else { 0 }
+                lesson = $lesson; detected_at = $now.ToString("o"); session_turn_count = if ($state -and $state.turn_count) { [int]$state.turn_count } else { 0 }
             }
         }
     }
@@ -72,7 +72,7 @@ if (Test-Path $evolveLog) {
         $script:learnings += @{
             pattern = "active_evolution"; type = "detection"; category = "Self-Evolution"
             lesson = "Evolution active: L1=$l1Count L2=$l2Count L3=$l3Count in 24h."
-            detected_at = $now.ToString("o"); session_turn_count = if ($state.turn_count) { [int]$state.turn_count } else { 0 }
+            detected_at = $now.ToString("o"); session_turn_count = if ($state -and $state.turn_count) { [int]$state.turn_count } else { 0 }
         }
     }
 }
