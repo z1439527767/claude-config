@@ -111,6 +111,11 @@
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\quick-evolve.ps1\"",
             "timeout": 5,
             "runInBackground": true
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\loop-guard.ps1\"",
+            "timeout": 3
           }
         ]
       }

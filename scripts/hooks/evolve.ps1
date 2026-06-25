@@ -34,10 +34,10 @@ if (Test-Path $gateFile) {
         $gate = Get-Content $gateFile -Raw | ConvertFrom-Json
         $lastEvo = [datetime]$gate.last_evolution
         $hoursSince = ($now - $lastEvo).TotalHours
-        # Reduced from 12h to 1h for active development
-        if ($hoursSince -lt 1) {
+        # Active dev: 10min minimum between evolutions
+        if ($hoursSince -lt 0.17) {
             $canEvolve = $false
-            $gateReason = "距上次进化 ${hoursSince}h < 1h"
+            $gateReason = "距上次进化 ${hoursSince}h < 10min"
         }
         # Reduced from 3/week to 10/week for active development
         $recentEvos = ($gate.recent_evo_timestamps | ForEach-Object { [datetime]$_ }) |
