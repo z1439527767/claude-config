@@ -96,6 +96,7 @@ def train():
         model.gradient_checkpointing_enable()
 
     # Training setup
+    # Auto-tune batch size: try 8→4→2 to avoid OOM
     batch_size = 2 if device == "cuda" else 1
     epochs = 6
     lr = 2e-4
