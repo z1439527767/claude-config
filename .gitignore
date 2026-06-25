@@ -1,0 +1,12 @@
+/*
+!/.gitignore
+!/CLAUDE.md
+!/CLAUDE.local.md
+!/AGENTS.md
+!/settings.json
+!/scripts/
+!/.claude/rules/
+!/.claude/skills/
+!/.claude/agents/
+!/.claude/workflows/
+!/.claude/evolution/
