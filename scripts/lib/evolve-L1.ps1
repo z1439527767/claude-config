@@ -1,9 +1,5 @@
-# evolve-L1.ps1 — Friction patterns → CLAUDE.md rules
-# Sourced by evolve.ps1; appends to $script:applied
-param()
-
 # evolve-L1.ps1 — Multi-source friction detection → CLAUDE.md rules
-# Now scans: tellonce friction events + tool failures + DB failure patterns
+# Sourced by evolve.ps1; appends to $script:applied
 param()
 
 $claudeMd = "$env:USERPROFILE\.claude\CLAUDE.md"
@@ -19,7 +15,7 @@ if (Test-Path $frictionDir) {
             ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ } |
             Where-Object { $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-7) } |
             ForEach-Object {
-                foreach ($s in ($_.signals -split ', ')) { $signals[$s] = ($signals[$s] ?? 0) + 1 }
+                foreach ($s in ($_.signals -split ', ')) { if (-not $signals[$s]) { $signals[$s] = 0 }; $signals[$s]++ }
             }
     }
 }
@@ -32,9 +28,9 @@ if (Test-Path $failuresDir) {
             Where-Object { $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-7) }
     } | ForEach-Object {
         $tool = $_.tool_name; $err = $_.error
-        if ($tool) { $signals["tool:$tool"] = ($signals["tool:$tool"] ?? 0) + 1 }
-        if ($err -match 'timeout|denied|blocked|refused|not found') { $signals["sys:$($Matches[0])"] = ($signals["sys:$($Matches[0])"] ?? 0) + 1 }
-        $signals["any_failure"] = ($signals["any_failure"] ?? 0) + 1
+        if ($tool) { if (-not $signals["tool:$tool"]) { $signals["tool:$tool"] = 0 }; $signals["tool:$tool"]++ }
+        if ($err -match 'timeout|denied|blocked|refused|not found') { $k = "sys:$($Matches[0])"; if (-not $signals[$k]) { $signals[$k] = 0 }; $signals[$k]++ }
+        if (-not $signals["any_failure"]) { $signals["any_failure"] = 0 }; $signals["any_failure"]++
     }
 }
 
@@ -50,7 +46,7 @@ if (Test-Path $evoLog) {
         foreach ($c in $e.changes) {
             if ($c -match 'L3: (\S+) timeout') {
                 $hookName = $Matches[1]
-                $tunedHooks[$hookName] = ($tunedHooks[$hookName] ?? 0) + 1
+                if (-not $tunedHooks[$hookName]) { $tunedHooks[$hookName] = 0 }; $tunedHooks[$hookName]++
             }
         }
     }
