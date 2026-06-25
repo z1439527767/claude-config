@@ -20,8 +20,12 @@ foreach ($hookN in $metrics.Keys) {
             foreach ($h in $group.hooks) {
                 if ($h.command -match [regex]::Escape($hookN)) {
                     $oldT = [int]$h.timeout
-                    $newT = [math]::Max(1, [math]::Min(30, [int]($m.avgMs / 1000 * 3 + 1)))
-                    if ([math]::Abs($newT - $oldT) / [math]::Max(1, $oldT) -gt 0.3) {
+                    # Use p95-like formula: max-duration-based, not avg-based (prevents oscillation)
+                    # avg*3 amplifies variance → timeout ping-pong. max*1.5 is stable.
+                    $baseMs = [math]::Max($m.maxMs, $m.avgMs * 1.5)
+                    $newT = [math]::Max(1, [math]::Min(30, [int]($baseMs / 1000 * 1.5 + 1)))
+                    # Only change if >50% different (was 30%, too sensitive)
+                    if ([math]::Abs($newT - $oldT) / [math]::Max(1, $oldT) -gt 0.5) {
                         $h.timeout = $newT
                         $script:applied += "L3: $hookN timeout ${oldT}s → ${newT}s (avg $($m.avgMs.ToString('N0'))ms, max $($m.maxMs)ms)"
                         $settingsModified = $true

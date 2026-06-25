@@ -91,10 +91,8 @@ $immuneInject = python3 "$baseDir\scripts\immune-system.py" --inject 2>> "$baseD
 if ($LASTEXITCODE -eq 0 -and $immuneInject) { $ctxLines += "`n$immuneInject" }
 
 # ═══════════════════════════════════════════
-# PHASE 6: Narrative — Previously on...
+# PHASE 6: Narrative — DISABLED (empty output, not enough data to narrate)
 # ═══════════════════════════════════════════
-$narrativeInject = python3 "$baseDir\scripts\narrative-engine.py" --inject 2>> "$baseDir\logs\session-errors.log"
-if ($LASTEXITCODE -eq 0 -and $narrativeInject) { $ctxLines += "`n$narrativeInject" }
 
 # ═══════════════════════════════════════════
 # PHASE 6b: Salience — Attention gate status

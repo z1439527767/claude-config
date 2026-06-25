@@ -2,36 +2,70 @@
 # Sourced by evolve.ps1; appends to $script:applied
 param()
 
+# evolve-L1.ps1 — Multi-source friction detection → CLAUDE.md rules
+# Now scans: tellonce friction events + tool failures + DB failure patterns
+param()
+
 $claudeMd = "$env:USERPROFILE\.claude\CLAUDE.md"
 $frictionDir = "$env:USERPROFILE\.claude\.claude\tellonce-state\friction"
+$failuresDir = "$env:USERPROFILE\.claude\.claude\tool_failures"
 $now = Get-Date
+$signals = @{}
 
-if (-not (Test-Path $frictionDir)) { return }
-
-$allFriction = Get-ChildItem $frictionDir -File -Filter "events.jsonl" -ErrorAction SilentlyContinue |
-    ForEach-Object {
+# Source 1: Tellonce friction events
+if (Test-Path $frictionDir) {
+    Get-ChildItem $frictionDir -File -Filter "events.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
         Get-Content $_.FullName -Tail 100 -ErrorAction SilentlyContinue | Where-Object { $_ } |
-            ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ }
-    }
-
-$recentFriction = $allFriction | Where-Object {
-    $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-7)
-}
-
-if ($recentFriction.Count -lt 2) { return }
-
-$signalCounts = @{}
-foreach ($f in $recentFriction) {
-    foreach ($s in ($f.signals -split ', ')) {
-        if (-not $signalCounts[$s]) { $signalCounts[$s] = 0 }
-        $signalCounts[$s]++
+            ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ } |
+            Where-Object { $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-7) } |
+            ForEach-Object {
+                foreach ($s in ($_.signals -split ', ')) { $signals[$s] = ($signals[$s] ?? 0) + 1 }
+            }
     }
 }
 
-$hotSignals = $signalCounts.GetEnumerator() | Where-Object { $_.Value -ge 3 } | Sort-Object Value -Descending
-if ($hotSignals.Count -eq 0) { return }
+# Source 2: Tool failure patterns (broadened detection)
+if (Test-Path $failuresDir) {
+    Get-ChildItem $failuresDir -File -Filter "failures.jsonl" -ErrorAction SilentlyContinue | ForEach-Object {
+        Get-Content $_.FullName -Tail 100 -ErrorAction SilentlyContinue | Where-Object { $_ } |
+            ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ } |
+            Where-Object { $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-7) }
+    } | ForEach-Object {
+        $tool = $_.tool_name; $err = $_.error
+        if ($tool) { $signals["tool:$tool"] = ($signals["tool:$tool"] ?? 0) + 1 }
+        if ($err -match 'timeout|denied|blocked|refused|not found') { $signals["sys:$($Matches[0])"] = ($signals["sys:$($Matches[0])"] ?? 0) + 1 }
+        $signals["any_failure"] = ($signals["any_failure"] ?? 0) + 1
+    }
+}
 
-$topSignal = ($hotSignals | Select-Object -First 1).Name
+# Source 3: Repeated timeout oscillation (L3 ping-pong detection)
+$evoLog = "$env:USERPROFILE\.claude\.claude\evolution_log.jsonl"
+if (Test-Path $evoLog) {
+    $recentEvos = Get-Content $evoLog -Tail 30 -ErrorAction SilentlyContinue | Where-Object { $_ } |
+        ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ } |
+        Where-Object { $_.timestamp -and ([datetime]$_.timestamp) -gt $now.AddDays(-1) }
+    # Detect timeout oscillation: same hook tuned 3+ times in 24h
+    $tunedHooks = @{}
+    foreach ($e in $recentEvos) {
+        foreach ($c in $e.changes) {
+            if ($c -match 'L3: (\S+) timeout') {
+                $hookName = $Matches[1]
+                $tunedHooks[$hookName] = ($tunedHooks[$hookName] ?? 0) + 1
+            }
+        }
+    }
+    foreach ($h in $tunedHooks.GetEnumerator()) {
+        if ($h.Value -ge 3) { $signals["oscillation:$($h.Name)"] = $h.Value }
+    }
+}
+
+if ($signals.Count -eq 0) { return }
+
+# Find strongest signal
+$topSignal = ($signals.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 1)
+if ($topSignal.Value -lt 3) { return }
+
+$signalName = $topSignal.Name
 $ruleMap = @{
     "错了" = "修改前先读文件确认当前内容"
     "不对" = "修改前先读文件确认当前内容"
@@ -42,14 +76,29 @@ $ruleMap = @{
     "不要" = "用户说停就停，不等完成当前操作"
     "停" = "用户说停就停，不等完成当前操作"
     "重新" = "失败后换方案重试，不复用同一条路"
+    "any_failure" = "工具失败后自动记录模式，积累3次触发规则生成"
+    "oscillation" = "Timeout反复振荡的hook改用p95算法，不用avg*3"
 }
 
-if (-not $ruleMap[$topSignal]) { return }
+$newRule = $ruleMap[$signalName]
+# Auto-generate rule for tool: patterns and oscillation patterns
+if (-not $newRule -and $signalName -match '^tool:(.+)') {
+    $toolName = $Matches[1]
+    $newRule = "工具 '$toolName' 反复失败——自动重试或fallback"
+} elseif (-not $newRule -and $signalName -match '^oscillation:(.+)') {
+    $hookName = $Matches[1]
+    $newRule = "Hook '$hookName' timeout反复振荡——硬编码p95值，不让L3自动调"
+} elseif (-not $newRule -and $signalName -match '^sys:(.+)') {
+    $errType = $Matches[1]
+    $newRule = "系统错误 '$errType' 反复出现——添加预检和自动恢复"
+}
+if (-not $newRule) { return }
 
-$newRule = $ruleMap[$topSignal]
+# Dedup: check if rule already exists
 $claudeContent = Get-Content $claudeMd -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
 if ($claudeContent -match [regex]::Escape($newRule)) { return }
 
+# Insert rule into CLAUDE.md
 $claudeLines = @($claudeContent -split "`n")
 $inserted = $false
 for ($i = $claudeLines.Count - 1; $i -ge 0; $i--) {
@@ -61,18 +110,4 @@ for ($i = $claudeLines.Count - 1; $i -ge 0; $i--) {
 }
 if (-not $inserted) { $claudeLines += "- $newRule" }
 $claudeLines -join "`n" | Set-Content $claudeMd -Encoding UTF8 -NoNewline
-$script:applied += "L1: CLAUDE.md + '$newRule' (信号: '$topSignal' x$($hotSignal.Value))"
-
-# Track rule effectiveness
-$ruleTrackFile = "$env:USERPROFILE\.claude\.claude\rule_effectiveness.json"
-$ruleTrack = @{}
-if (Test-Path $ruleTrackFile) { try { $ruleTrack = Get-Content $ruleTrackFile -Raw | ConvertFrom-Json } catch {} }
-$ruleId = "rule_$(Get-Date -Format 'yyyyMMddHHmmss')"
-$ruleTrack[$ruleId] = @{
-    rule = $newRule
-    signal = $topSignal
-    added = (Get-Date -Format "o")
-    friction_before = $recentFriction.Count
-    status = "active"
-}
-$ruleTrack | ConvertTo-Json | Set-Content $ruleTrackFile -Encoding UTF8
+$script:applied += "L1: CLAUDE.md + '$newRule' (信号: '$signalName' x$($topSignal.Value), ${sources} sources)"
