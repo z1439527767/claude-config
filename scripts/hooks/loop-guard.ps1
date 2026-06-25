@@ -23,7 +23,7 @@ if (Test-Path $stateFile) {
 
 # Cooldown: only block if 5+ min since last cycle
 $cooldownFile = "$env:USERPROFILE\.claude\.claude\loop_cooldown"
-$cooldownMin = 5
+$cooldownMin = 1
 if (Test-Path $cooldownFile) {
     $lastCycle = [datetime](Get-Content $cooldownFile -Raw)
     if (((Get-Date) - $lastCycle).TotalMinutes -lt $cooldownMin) {
