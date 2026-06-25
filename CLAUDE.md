@@ -24,6 +24,13 @@
 ## 5. 不重复造轮子
 改前先查：现有机制能不能直接用？复用 > 新建。
 
+## 5.5. 上下文工程（Agent TARS 多级记忆）
+- L0 永久：CLAUDE.md / AGENTS.md / settings.json → 永不压缩
+- L1 运行：handoff.md / loop_state.json → 跨会话手递手
+- L2 循环：evolution_log / cycle_log → 每轮覆盖
+- L3 即时：hook_perf / temp state → 自动清理
+**每层独立，上层不污染下层。上下文是预算，不是背包。**
+
 ## 6. 关键模式
 - PreToolUse hook 必须精确 matcher。无 matcher = 全局噪音。
 - Stop hook `{"decision":"block"}` = 原生自循环。
