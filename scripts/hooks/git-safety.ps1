@@ -1,7 +1,6 @@
 # Git Safety PreToolUse Hook (Bash matcher)
 # Blocks --no-verify, --no-gpg-sign, -c commit.gpgsign=false, and force push to main/master
-$sw = [Diagnostics.Stopwatch]::StartNew()
-function Write-PerfLog($c) { $d="$env:USERPROFILE\.claude\.claude\hook_perf"; if(-not(Test-Path $d)){mkdir -Force $d|Out-Null}; @{t=(Get-Date -Format "o");h="git-safety";d=$sw.ElapsedMilliseconds;e=$c}|ConvertTo-Json -Compress|Add-Content "$d\git-safety.jsonl" -Encoding UTF8 }
+$perfHookName = "git-safety"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 $cmd = $env:CLAUDE_TOOL_INPUT; if ($cmd -and $cmd -notmatch '\bgit\b') { Write-PerfLog 0; exit 0 }
 $toolInput = $env:CLAUDE_TOOL_INPUT
 $ErrorActionPreference = "SilentlyContinue"
@@ -20,19 +19,19 @@ if (-not $toolInput) {
 if ($toolInput) {
     if ($toolInput -match '--no-verify\b') {
         Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: --no-verify blocked. Run hooks properly." } }'
-        exit 2
+        Write-PerfLog 2; exit 2
     }
     if ($toolInput -match '--no-gpg-sign\b') {
         Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: --no-gpg-sign blocked. Sign commits properly." } }'
-        exit 2
+        Write-PerfLog 2; exit 2
     }
     if ($toolInput -match '-c\s+commit\.gpgsign\s*=\s*false') {
         Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: -c commit.gpgsign=false blocked. Sign commits properly." } }'
-        exit 2
+        Write-PerfLog 2; exit 2
     }
     if ($toolInput -match '--force\s+(origin/)?(main|master)') {
         Write-Output '{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "GIT SAFETY: force push to main/master blocked." } }'
-        exit 2
+        Write-PerfLog 2; exit 2
     }
 }
 Write-Output '{}'
