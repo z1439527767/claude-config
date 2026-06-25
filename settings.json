@@ -232,6 +232,11 @@
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
             "timeout": 2
+          },
+          {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\sync-brain.ps1\"",
+            "timeout": 2
           }
         ]
       }
