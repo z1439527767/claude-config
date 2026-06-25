@@ -34,7 +34,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\read-before-edit.ps1\"",
-            "timeout": 2
+            "timeout": 1
           }
         ]
       }
@@ -46,7 +46,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\track-reads.ps1\"",
-            "timeout": 2,
+            "timeout": 1,
             "runInBackground": true
           }
         ]
@@ -97,7 +97,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-distill.ps1\"",
-            "timeout": 4
+            "timeout": 1
           },
           {
             "type": "command",
@@ -113,7 +113,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
-            "timeout": 10
+            "timeout": 1
           }
         ]
       }
@@ -129,13 +129,13 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\quick-evolve.ps1\"",
-            "timeout": 5,
+            "timeout": 1,
             "runInBackground": true
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\loop-guard.ps1\"",
-            "timeout": 3
+            "timeout": 1
           }
         ]
       }
@@ -162,7 +162,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-stop.ps1\"",
-            "timeout": 3
+            "timeout": 1
           }
         ]
       }
