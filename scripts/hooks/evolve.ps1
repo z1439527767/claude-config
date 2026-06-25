@@ -247,8 +247,9 @@ if (Test-Path $perfDir) {
 # L5: PROACTIVE OPTIMIZATION (NEW)
 # ═══════════════════════════════════════
 
-# 5a: Detect unused scripts (exist but not referenced by any hook)
-$allScripts = @(Get-ChildItem "$env:USERPROFILE\.claude\scripts\hooks\*.ps1" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+# 5a: Detect unused scripts (not referenced by any hook OR other script)
+$scriptsDir5a = "$env:USERPROFILE\.claude\scripts\hooks"
+$allScripts = @(Get-ChildItem "$scriptsDir5a\*.ps1" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
 $referencedScripts = @{}
 foreach ($eventName in $settings.hooks.PSObject.Properties.Name) {
     foreach ($group in $settings.hooks.$eventName) {
@@ -256,6 +257,18 @@ foreach ($eventName in $settings.hooks.PSObject.Properties.Name) {
             foreach ($sn in $allScripts) {
                 if ($h.command -match [regex]::Escape($sn)) { $referencedScripts[$sn] = $true }
             }
+        }
+    }
+}
+# Also check cross-script references (e.g. learn-online.ps1 called by loop-guard.ps1)
+foreach ($sn in $allScripts) {
+    if ($referencedScripts[$sn]) { continue }
+    $pat = [regex]::Escape($sn)
+    foreach ($other in $allScripts) {
+        if ($other -eq $sn) { continue }
+        if ((Get-Content (Join-Path $scriptsDir5a $other) -Raw -ErrorAction SilentlyContinue) -match $pat) {
+            $referencedScripts[$sn] = $true
+            break
         }
     }
 }
@@ -366,11 +379,13 @@ if (Test-Path $memDir) {
     if (Test-Path $memIndex) {
         $memContent = Get-Content $memIndex -Raw -Encoding UTF8
 
-        # Count memories by tag
-        $freshCount = ([regex]::Matches($memContent, '\[fresh\]')).Count
-        $agingCount = ([regex]::Matches($memContent, '\[aging\]')).Count
-        $staleCount = ([regex]::Matches($memContent, '\[stale\]')).Count
-        $expiredCount = ([regex]::Matches($memContent, '\[expired\]')).Count
+        # Count memories by tag — only on memory entries (skip legend lines)
+        $entryLines = ($memContent -split "`n" | Where-Object { $_ -match '^- \[' })
+        $entryContent = $entryLines -join "`n"
+        $freshCount = ([regex]::Matches($entryContent, '\[fresh\]')).Count
+        $agingCount = ([regex]::Matches($entryContent, '\[aging\]')).Count
+        $staleCount = ([regex]::Matches($entryContent, '\[stale\]')).Count
+        $expiredCount = ([regex]::Matches($entryContent, '\[expired\]')).Count
 
         if ($expiredCount -gt 0) {
             $changes += "L4: $expiredCount 条记忆已过期，建议清理"
