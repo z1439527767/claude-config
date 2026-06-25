@@ -2,8 +2,8 @@
   "env": {
     "DEEPSEEK_API_KEY": "${DEEPSEEK_API_KEY}",
     "DEEPSEEK_BASE_URL": "https://api.deepseek.com/v1",
-    "DEEPSEEK_DEFAULT_MODEL": "deepseek-reasoner",
-    "DEEPSEEK_MODEL": "deepseek-reasoner",
+    "DEEPSEEK_DEFAULT_MODEL": "deepseek-v4-pro",
+    "DEEPSEEK_MODEL": "deepseek-v4-pro",
     "CLAUDE_CODE_DEFAULT_EFFORT": "high",
     "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
     "CLAUDE_MAX_CONTEXT_WINDOW": "200000",
