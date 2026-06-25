@@ -305,9 +305,13 @@ if (Test-Path $failureDir) {
             ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } | Where-Object { $_ }
         if ($failures.Count -lt 3) { return }
 
-        # Count failure by tool
+        # Count failure by tool — skip logging artifacts (null tool_name)
         $toolCounts = @{}
-        foreach ($f in $failures) { if (-not $toolCounts[$f.tool_name]) { $toolCounts[$f.tool_name] = 0 }; $toolCounts[$f.tool_name]++ }
+        foreach ($f in $failures) {
+            if (-not $f.tool_name -or $f.tool_name -eq 'unknown' -or -not $f.tool_input) { continue }
+            if (-not $toolCounts[$f.tool_name]) { $toolCounts[$f.tool_name] = 0 }
+            $toolCounts[$f.tool_name]++
+        }
 
         $hotTools = $toolCounts.GetEnumerator() | Where-Object { $_.Value -ge 3 } | Sort-Object Value -Descending
         foreach ($ht in $hotTools) {
