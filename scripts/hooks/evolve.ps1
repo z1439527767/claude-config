@@ -5,6 +5,7 @@
 param()
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
+$perfHookName = "evolve"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $claudeMd   = "$env:USERPROFILE\.claude\CLAUDE.md"
 $agentsMd   = "$env:USERPROFILE\.claude\AGENTS.md"
@@ -51,7 +52,7 @@ if (Test-Path $gateFile) {
 
 if (-not $canEvolve) {
     Write-Output "EVOLVE: gated — $gateReason"
-    exit 0
+    Write-PerfLog 0; exit 0
 }
 
 # ═══════════════════════════════════════
@@ -504,4 +505,4 @@ if (Test-Path $perfDir) {
         }
 }
 
-exit 0
+Write-PerfLog 0; exit 0

@@ -8,7 +8,7 @@ $memIndex = Join-Path $memDir "MEMORY.md"
 $agentsMd = "$env:USERPROFILE\.claude\AGENTS.md"
 $distillState = "$env:USERPROFILE\.claude\.claude\distill_state.json"
 
-if (-not (Test-Path $memIndex)) { exit 0 }
+if (-not (Test-Path $memIndex)) { Write-PerfLog 0; exit 0 }
 
 # Parse MEMORY.md entries
 $lines = (Get-Content $memIndex -Raw -Encoding UTF8) -split "`n"
@@ -24,7 +24,7 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
     }
 }
 
-if ($entries.Count -lt 3) { exit 0 }
+if ($entries.Count -lt 3) { Write-PerfLog 0; exit 0 }
 
 # Load state to track which groups we've already distilled
 $state = @{ distilled_groups = @{} }
@@ -106,4 +106,4 @@ if (Test-Path $trendFile) {
         }
     }
 }
-exit 0
+Write-PerfLog 0; exit 0

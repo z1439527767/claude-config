@@ -3,7 +3,7 @@ param()
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $OutputEncoding = [Text.Encoding]::UTF8
-$sw = [Diagnostics.Stopwatch]::StartNew()
+$perfHookName = "session-start"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 $baseDir = "$env:USERPROFILE\.claude"
 
@@ -113,10 +113,4 @@ if ($ctxLines.Count -gt 0) {
     Write-Output $statusMsg
 }
 
-# Perf log
-$perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
-if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | Out-Null }
-@{ t = (Get-Date -Format "o"); h = "session-start"; d = $sw.ElapsedMilliseconds; e = $totalScripts } |
-    ConvertTo-Json -Compress | Add-Content "$perfDir\session-start.jsonl" -Encoding UTF8
-
-if ($errors.Count -gt 0) { exit 1 } else { exit 0 }
+if ($errors.Count -gt 0) { Write-PerfLog 1; exit 1 } else { Write-PerfLog 0; exit 0 }

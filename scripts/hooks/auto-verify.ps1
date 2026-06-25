@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
-$sw = [Diagnostics.Stopwatch]::StartNew()
+$perfHookName = "auto-verify"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
 if ($tool_name -notin @("Edit", "Write")) { exit 0 }
 
@@ -70,12 +70,7 @@ switch ($ext) {
 }
 
 if ($errors.Count -eq 0) {
-    $sw.Stop()
-    $perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
-    if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | Out-Null }
-    @{timestamp=(Get-Date -Format "o"); hook="auto-verify"; duration_ms=$sw.ElapsedMilliseconds; exit_code=0; file=$filePath} |
-        ConvertTo-Json -Compress | Add-Content "$perfDir\auto-verify.jsonl" -Encoding UTF8
-    exit 0
+    Write-PerfLog 0; exit 0
 }
 
 # ── Escalation Chain: Retry → Investigate → Fix → Rollback → Escalate ──
@@ -142,10 +137,6 @@ foreach ($e in $errors) {
 }
 
 # ── Report ──
-$sw.Stop()
-$perfDir = "$env:USERPROFILE\.claude\.claude\hook_perf"
-if (-not (Test-Path $perfDir)) { New-Item -ItemType Directory -Force $perfDir | Out-Null }
-
 if ($healed.Count -gt 0) {
     $items = ($healed | ForEach-Object { "$(Split-Path $_.file -Leaf)(L$($_.level))" }) -join ", "
     Write-Output "[auto-heal] $items"
@@ -161,6 +152,4 @@ if ($escalated.Count -gt 0) {
     $exitCode = 2
 }
 
-@{timestamp=(Get-Date -Format "o"); hook="auto-verify"; duration_ms=$sw.ElapsedMilliseconds; exit_code=$exitCode; file=$filePath; healed=($healed.Count -gt 0); escalated=($escalated.Count -gt 0)} |
-    ConvertTo-Json -Compress | Add-Content "$perfDir\auto-verify.jsonl" -Encoding UTF8
-exit $exitCode
+Write-PerfLog $exitCode; exit $exitCode
