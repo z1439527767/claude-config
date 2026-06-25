@@ -78,6 +78,11 @@
             "timeout": 10
           },
           {
+            "type": "command",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-score.ps1\"",
+            "timeout": 3
+          },
+          {
             "type": "agent",
             "prompt": "Check if nudge_pending.txt exists at C:\\Users\\z1439\\.claude\\.claude\\nudge_pending.txt. If it does exist and was created within the last 30 minutes (compare its content timestamp with current time), then: (1) read the evolution log at C:\\Users\\z1439\\.claude\\.claude\\evolution_log.jsonl (last 30 entries), (2) read friction events at C:\\Users\\z1439\\.claude\\.claude\\tellonce-state\\friction\\events.jsonl (last 20 entries), (3) read success patterns from CLAUDE.local.md and the knowledge graph, (4) do a quick review identifying recurring patterns, emerging friction, or success patterns worth distilling, (5) write findings to C:\\Users\\z1439\\.claude\\.claude\\nudge_findings.json with structure { \"timestamp\": \"...\", \"patterns\": [...], \"friction\": [...], \"success_patterns\": [...], \"recommendations\": [...] }, (6) delete the nudge_pending.txt flag file. If nudge_pending.txt doesn't exist or its content is more than 30 minutes old, do nothing.",
             "timeout": 30
@@ -105,7 +110,8 @@
           },
           {
             "type": "agent",
-            "prompt": "You are an adversarial code reviewer. Review ALL changes made in this session. Find: (1) bugs or logic errors, (2) missing edge cases, (3) unverified claims — things Claude said 'done' but didn't prove with external evidence, (4) missed related files that should have been changed. Be skeptical. If nothing wrong, say 'PASS'. If issues found, list them with file paths.",
+            "model": "haiku",
+            "prompt": "You are an independent adversarial reviewer. Use a different reasoning approach than Claude — you are NOT the same model. Review ALL changes made in this session. Find: (1) bugs or logic errors, (2) missing edge cases, (3) unverified claims — things Claude said 'done' but didn't prove with external evidence (exit codes, file content, test output), (4) missed related files that should have been changed. Be skeptical. Don't trust Claude's self-assessment. If nothing wrong, say 'PASS'. If issues found, list them with file paths.",
             "timeout": 30
           }
         ]
