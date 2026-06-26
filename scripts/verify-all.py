@@ -36,7 +36,8 @@ LIB_DIR = SCRIPTS_DIR / 'lib'
 SETTINGS_FILE = CLAUDE / 'settings.json'
 CLAUDE_MD = CLAUDE / 'CLAUDE.md'
 AGENTS_MD = CLAUDE / 'AGENTS.md'
-MEMORY_DIR = HOME / '.claude' / 'projects' / 'C--Users-z1439--claude' / 'memory'
+_mem_dirs = list((CLAUDE / 'projects').glob('*/memory'))
+MEMORY_DIR = _mem_dirs[0] if _mem_dirs else CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
 
 SEVERITY = {"OK": 0, "INFO": 1, "WARN": 2, "ERROR": 3, "CRITICAL": 4}
 SEVERITY_ICON = {"OK": "✅", "INFO": "ℹ️", "WARN": "⚠️", "ERROR": "🔴", "CRITICAL": "🚨"}
