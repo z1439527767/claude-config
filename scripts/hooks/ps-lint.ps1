@@ -61,7 +61,23 @@ if ($content -match '\bWrite-Host\b') {
 }
 
 if ($issues.Count -gt 0) {
-    Write-Output "[ps-lint] $($(Split-Path $filePath -Leaf)): $($issues -join '; ')"
+    $fname = Split-Path $filePath -Leaf
+    Write-Output "[ps-lint] $($fname): $($issues -join '; ')"
+
+    # Feed into evolution pipeline: write friction event so L1 can detect patterns
+    $frictionDir = "$env:USERPROFILE\.claude\.claude\tellonce-state\friction"
+    if (-not (Test-Path $frictionDir)) { try { New-Item -ItemType Directory -Force $frictionDir | Out-Null } catch {} }
+    $event = @{
+        timestamp = (Get-Date -Format "o")
+        signals   = ($issues -join ", ")
+        categories = "ps-lint"
+        prompt_snippet = "ps-lint detected in $fname"
+    } | ConvertTo-Json -Compress
+    $logFile = Join-Path $frictionDir "events.jsonl"
+    try { python "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert "friction/events" "" $event 2>$null | Out-Null } catch {
+        Add-Content -Path $logFile -Value $event -Encoding UTF8
+    }
+
     Write-PerfLog 1; exit 1
 }
 
