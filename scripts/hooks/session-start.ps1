@@ -33,7 +33,12 @@ foreach ($eventName in $settings.hooks.PSObject.Properties.Name) {
     if (-not (Test-Path $_)) { $healthIssues += "$(Split-Path $_ -Leaf) missing" }
 }
 
-@("$baseDir\.claude\hook_perf","$baseDir\.claude\session_history","$baseDir\projects\C--Users-z1439--claude\memory") | ForEach-Object {
+$memDir = Get-ChildItem "$baseDir\projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
+if (-not $memDir) { $memDir = "$baseDir\projects\C--Users-$env:USERNAME--claude\memory" }
+@("$baseDir\.claude\hook_perf","$baseDir\.claude\session_history", $memDir) | ForEach-Object {
     if (-not (Test-Path $_)) { try { New-Item -ItemType Directory -Force $_ | Out-Null } catch { $healthIssues += "cannot create $_" } }
 }
 

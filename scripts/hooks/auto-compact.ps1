@@ -15,8 +15,11 @@ $rulesDir = "$baseDir\.claude\rules"
 if (Test-Path $rulesDir) {
     Get-ChildItem $rulesDir -Filter "*.md" | ForEach-Object { $l0Tokens += [math]::Round($_.Length / 3) }
 }
-$memIndex = "$baseDir\projects\C--Users-z1439--claude\memory\MEMORY.md"
-if (Test-Path $memIndex) { $l0Tokens += [math]::Round((Get-Item $memIndex).Length / 3) }
+$memIndex = Get-ChildItem "$baseDir\projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory\MEMORY.md" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
+if ($memIndex) { $l0Tokens += [math]::Round((Get-Item $memIndex).Length / 3) }
 
 # Signal 2: Tool call count this session (proxy for conversation length)
 $toolCountFile = "$baseDir\.claude\tool_count.txt"
