@@ -32,10 +32,10 @@ def check_git():
     import subprocess
     try:
         r = subprocess.run(['git', '-C', str(CLAUDE), 'status', '--porcelain'],
-                          capture_output=True, text=True, timeout=5)
+                          capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=5)
         dirty = len([l for l in r.stdout.split('\n') if l.strip()])
         r2 = subprocess.run(['git', '-C', str(CLAUDE), 'log', '--oneline', '-1'],
-                           capture_output=True, text=True, timeout=5)
+                           capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=5)
         return {
             'dirty_files': dirty,
             'last_commit': r2.stdout.strip()[:60],
