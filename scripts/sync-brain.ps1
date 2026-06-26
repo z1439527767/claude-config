@@ -196,8 +196,38 @@ if (Test-Path $gitDir) {
     }
 }
 
+# ===== AUTO-FIX (when -Fix is specified) =====
+if ($Fix -and $issues.Count -gt 0) {
+    # Fix: session-bloat → remove empty dirs
+    if ((Test-Path $sessionEnv) -and ($issues -match 'session-bloat')) {
+        Get-ChildItem $sessionEnv -Directory -ErrorAction SilentlyContinue | Where-Object {
+            @(Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue).Count -eq 0
+        } | ForEach-Object {
+            Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            $fixed += "[auto-fix] removed empty session dir: $($_.Name)"
+        }
+        $issues = $issues | Where-Object { $_ -notmatch 'session-bloat' }
+    }
+
+    # Fix: git-dirty → auto-commit if running in loop context
+    if (($issues -match 'git-dirty') -and (Test-Path "$HomeDir/.claude/.git")) {
+        $status = git -C "$HomeDir/.claude" status --porcelain 2>$null
+        if ($status) {
+            git -C "$HomeDir/.claude" add -A 2>$null
+            $msg = $status -join '; '
+            git -C "$HomeDir/.claude" commit -m "auto: sync-brain fix — $msg" 2>$null
+            $fixed += "[auto-fix] committed dirty files"
+            $issues = $issues | Where-Object { $_ -notmatch 'git-dirty' }
+        }
+    }
+}
+
 # ===== OUTPUT =====
 if (-not $Quiet) {
+    if ($fixed.Count -gt 0) {
+        Write-Output "[sync-brain] FIXED: $($fixed.Count) issue(s)"
+        foreach ($f in $fixed) { Write-Output "  ✓ $f" }
+    }
     if ($issues.Count -eq 0) {
         Write-Output "[sync-brain] OK: brain and files are in sync"
     } else {
