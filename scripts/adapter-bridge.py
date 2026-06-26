@@ -28,7 +28,8 @@ from typing import Optional
 
 BASE_DIR = Path(os.environ.get("USERPROFILE", "~")) / ".claude"
 SCRIPTS_DIR = BASE_DIR / "scripts"
-MEMORY_DIR = BASE_DIR / "projects" / "C--Users-z1439--claude" / "memory"
+_mem_dirs = list((BASE_DIR / "projects").glob("*/memory"))
+MEMORY_DIR = _mem_dirs[0] if _mem_dirs else BASE_DIR / "projects" / f"C--Users-{os.environ.get('USERNAME','z1439')}--claude" / "memory"
 STATE_DIR = BASE_DIR / ".claude"
 LOGS_DIR = BASE_DIR / "logs"
 BRIDGE_STATE_FILE = STATE_DIR / "bridge_state.json"
