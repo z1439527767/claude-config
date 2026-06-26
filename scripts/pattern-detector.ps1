@@ -89,12 +89,17 @@ if (Test-Path $workStackFile) {
     try { $stack = Get-Content $workStackFile -Raw | ConvertFrom-Json } catch {}
 }
 
-# Infer current level from recent activity
+# Infer current level from recent commit messages (count by prefix, not first-match)
 $recentCommits = try { git -C "$HomeDir/.claude" log --since="2 hours ago" --oneline 2>$null } catch { "" }
-if ($recentCommits -match 'fix:|auto:') { $stack.p2_checks++ }
-elseif ($recentCommits -match 'review|audit') { $stack.p3_reviews++ }
-elseif ($recentCommits -match 'feat:|refactor|rule|memory') { $stack.p4_sediment++ }
-elseif ($recentCommits -match 'perf|clean|optimize') { $stack.p5_optimize++ }
+if ($recentCommits) {
+    $commits = @($recentCommits -split "`n" | Where-Object { $_ -match '\S' })
+    foreach ($c in $commits) {
+        if ($c -match '\b(fix|auto|hotfix):') { $stack.p2_checks++ }
+        elseif ($c -match '\b(review|audit|verify)') { $stack.p3_reviews++ }
+        elseif ($c -match '\b(feat|refactor|rule|memory|docs|chore):') { $stack.p4_sediment++ }
+        elseif ($c -match '\b(perf|clean|optimize|trim)') { $stack.p5_optimize++ }
+    }
+}
 
 $stack.last_update = (Get-Date -Format "o")
 $tmpStack = "$workStackFile.tmp.$([Guid]::NewGuid().ToString("N").Substring(0,8))"
@@ -106,15 +111,38 @@ if ($p2Only) {
     $issues += "[workstack-stuck] P2-heavy ($($stack.p2_checks) checks, 0 P3-P5 work) — need to escalate to real tasks"
 }
 
-# ===== 4. KG SIGNAL CLEANUP =====
-# Trim kg_signals.jsonl if >200 lines (keep last 50)
-$signalFile = "$HomeDir/.claude/.claude/kg_signals.jsonl"
-if ((Test-Path $signalFile) -and $Fix) {
-    $lineCount = (Get-Content $signalFile | Measure-Object).Count
-    if ($lineCount -gt 200) {
-        $keep = Get-Content $signalFile -Tail 50
-        $tmpSig = "$signalFile.tmp.$([Guid]::NewGuid().ToString("N").Substring(0,8))"
-        try { $keep | Set-Content $tmpSig -Encoding UTF8; Move-Item -Force $tmpSig $signalFile } catch {}
+# ===== 4. LOG CLEANUP (prevent unbounded growth) =====
+if ($Fix) {
+    # Trim kg_signals.jsonl if >200 lines (keep last 50)
+    $signalFile = "$HomeDir/.claude/.claude/kg_signals.jsonl"
+    if (Test-Path $signalFile) {
+        $lineCount = (Get-Content $signalFile | Measure-Object).Count
+        if ($lineCount -gt 200) {
+            $keep = Get-Content $signalFile -Tail 50
+            $tmpSig = "$signalFile.tmp.$([Guid]::NewGuid().ToString("N").Substring(0,8))"
+            try { $keep | Set-Content $tmpSig -Encoding UTF8; Move-Item -Force $tmpSig $signalFile } catch {}
+        }
+    }
+
+    # Trim compliance_log.jsonl if >500KB (keep last 100 lines)
+    $complianceLog = "$HomeDir/.claude/.claude/tellonce-state/obs_log/compliance_log.jsonl"
+    if (Test-Path $complianceLog) {
+        $size = (Get-Item $complianceLog).Length
+        if ($size -gt 500KB) {
+            $keep = Get-Content $complianceLog -Tail 100
+            $tmpCL = "$complianceLog.tmp.$([Guid]::NewGuid().ToString("N").Substring(0,8))"
+            try { $keep | Set-Content $tmpCL -Encoding UTF8; Move-Item -Force $tmpCL $complianceLog } catch {}
+        }
+    }
+
+    # Trim hook_perf jsonl files >100KB each
+    $perfDir = "$HomeDir/.claude/.claude/hook_perf"
+    if (Test-Path $perfDir) {
+        Get-ChildItem $perfDir -Filter "*.jsonl" | Where-Object { $_.Length -gt 100KB } | ForEach-Object {
+            $keep = Get-Content $_.FullName -Tail 50
+            $tmpP = "$($_.FullName).tmp.$([Guid]::NewGuid().ToString("N").Substring(0,8))"
+            try { $keep | Set-Content $tmpP -Encoding UTF8; Move-Item -Force $tmpP $_.FullName } catch {}
+        }
     }
 }
 
