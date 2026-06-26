@@ -8,7 +8,10 @@ param([switch]$ToKG, [switch]$FromKG, [switch]$Diff, [switch]$Full)
 
 $ErrorActionPreference = "Continue"
 $baseDir = "$env:USERPROFILE\.claude"
-$memDir = "$baseDir\projects\C--Users-z1439--claude\memory"
+$memDir = Get-ChildItem "$baseDir\projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
 $syncStateFile = "$baseDir\.claude\sync_state.json"
 
 function Get-LocalManifest {

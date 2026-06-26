@@ -22,6 +22,11 @@ function Build-Index {
         files = @()
     }
 
+    $memIndex = Get-ChildItem "$baseDir\projects" -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object { Join-Path $_.FullName "memory\MEMORY.md" } |
+        Where-Object { Test-Path $_ } |
+        Select-Object -First 1
+
     $patterns = @(
         @{ glob = "*.md"; dir = $baseDir; category = "config" },
         @{ glob = "*.json"; dir = $baseDir; category = "config" },
@@ -30,8 +35,8 @@ function Build-Index {
         @{ glob = "*.ps1"; dir = "$baseDir\scripts\lib"; category = "lib" },
         @{ glob = "*.ps1"; dir = "$baseDir\scripts"; category = "scripts" },
         @{ glob = "*.py"; dir = "$baseDir\scripts"; category = "scripts" },
-        @{ glob = "*.md"; dir = "$baseDir\projects\C--Users-z1439--claude\memory"; category = "memory" },
-        @{ glob = "*.json"; dir = "$baseDir\projects\C--Users-z1439--claude\memory"; category = "memory" },
+        @{ glob = "*.md"; dir = (Split-Path $memIndex -Parent); category = "memory" },
+        @{ glob = "*.json"; dir = (Split-Path $memIndex -Parent); category = "memory" },
         @{ glob = "*.md"; dir = "$baseDir\.claude\skills"; category = "skills" }
     )
 

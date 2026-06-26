@@ -134,7 +134,10 @@ if ($All) {
     }
 
     # Check for stale memory
-    $memIndex = "$baseDir\projects\C--Users-z1439--claude\memory\MEMORY.md"
+    $memIndex = Get-ChildItem "$baseDir\projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory\MEMORY.md" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
     if (Test-Path $memIndex) {
         $aging = @(Get-Content $memIndex -Encoding UTF8 | Where-Object { $_ -match 'aging|stale' })
         if ($aging.Count -gt 0) {

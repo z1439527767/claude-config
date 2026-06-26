@@ -58,7 +58,10 @@ function Get-CoreStats {
     $rules  = (Get-ChildItem "$CORE_PATH\.claude\rules\*.md" -EA SilentlyContinue).Count
     $hooks  = (Get-ChildItem "$CORE_PATH\scripts\hooks\*.ps1" -EA SilentlyContinue).Count
     $memory = 0
-    $memIdx = "$CORE_PATH\projects\C--Users-z1439--claude\memory\MEMORY.md"
+    $memIdx = Get-ChildItem "$CORE_PATH\projects" -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object { Join-Path $_.FullName "memory\MEMORY.md" } |
+        Where-Object { Test-Path $_ } |
+        Select-Object -First 1
     if (Test-Path $memIdx) {
         $mc = Get-Content $memIdx -Raw -Encoding UTF8
         $memory = ($mc | Select-String '- \[').Matches.Count

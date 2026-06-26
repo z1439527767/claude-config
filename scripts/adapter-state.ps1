@@ -78,7 +78,10 @@ if (Test-Path $loopState) {
 }
 
 # ═══ 3. Memory ═══
-$memDir = "$baseDir\projects\C--Users-z1439--claude\memory"
+$memDir = Get-ChildItem "$baseDir\projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
 $memFiles = @(Get-ChildItem $memDir -Recurse -Filter "*.md" -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "MEMORY.md" }).Count
 $memIndex = "$memDir\MEMORY.md"
 $memIndexed = 0

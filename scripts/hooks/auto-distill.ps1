@@ -5,7 +5,11 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "auto-distill"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
-$memDir = "$env:USERPROFILE\.claude\projects\C--Users-z1439--claude\memory"
+$memDir = Get-ChildItem "$env:USERPROFILE\.claude\projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
+if (-not $memDir) { $memDir = "$env:USERPROFILE\.claude\projects\C--Users-$env:USERNAME--claude\memory" }
 $memIndex = Join-Path $memDir "MEMORY.md"
 $distillState = "$env:USERPROFILE\.claude\.claude\distill_state.json"
 
