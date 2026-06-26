@@ -13,10 +13,10 @@ try { Get-Content $settingsJson -Raw | ConvertFrom-Json | Out-Null } catch {
     $verifyOk = $false; $verifyErrors += "settings.json invalid: $_"
 }
 
-# 2. All hook scripts must parse clean
-Get-ChildItem "$env:USERPROFILE\.claude\scripts\hooks\*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
+# 2. All hook scripts must parse clean (suppress output to avoid noise)
+$null = Get-ChildItem "$env:USERPROFILE\.claude\scripts\hooks\*.ps1" -ErrorAction SilentlyContinue | ForEach-Object {
     $nullVar = $null; $pe = @()
-    [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$nullVar, [ref]$pe)
+    $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$nullVar, [ref]$pe)
     if ($pe.Count -gt 0) { $verifyOk = $false; $verifyErrors += "$($_.Name): $($pe.Count) parse errors" }
 }
 
@@ -41,20 +41,26 @@ try {
 if (-not $verifyOk) {
     $rollbackMsg = "ROLLBACK: verification failed — $($verifyErrors -join '; ')"
     $script:changes += $rollbackMsg
-    try {
-        Push-Location "$env:USERPROFILE\.claude"
-        $preCommit = & git log --oneline -1 --grep="pre-evolution" --format="%H" 2>$null
-        if ($preCommit) {
-            & git reset --hard $preCommit 2>$null
-            $script:changes += "ROLLBACK: reverted to pre-evolution commit $($preCommit.Substring(0,8))"
-        } else {
-            $lastMsg = & git log --oneline -1 --format="%s" 2>$null
-            if ($lastMsg -match 'evo:|post-evolution') {
-                & git reset --hard HEAD~1 2>$null
-                $script:changes += "ROLLBACK: reverted last evolution commit"
+    # Surgical restore from evo_backups — never git reset (destroys unrelated commits)
+    $backupDir = "$env:USERPROFILE\.claude\.claude\evo_backups"
+    $ts = (Get-Date -Format "yyyyMMdd_HHmmss")
+    $restored = @()
+    @("$env:USERPROFILE\.claude\settings.json", "$env:USERPROFILE\.claude\CLAUDE.md", "$env:USERPROFILE\.claude\AGENTS.md") | ForEach-Object {
+        if (Test-Path $_) {
+            $latest = Get-ChildItem $backupDir -File -Filter "$(Split-Path $_ -Leaf).*.bak" -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($latest) {
+                try {
+                    Copy-Item $latest.FullName $_ -Force -ErrorAction Stop
+                    $restored += Split-Path $_ -Leaf
+                } catch {}
             }
         }
-        Pop-Location
-    } catch { $script:changes += "ROLLBACK FAILED: $_" }
+    }
+    if ($restored.Count -gt 0) {
+        $script:changes += "ROLLBACK: surgically restored $($restored -join ', ') from backup"
+    } else {
+        $script:changes += "ROLLBACK: no backup found, manual recovery needed"
+    }
     $script:applied = @()
 }
