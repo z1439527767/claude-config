@@ -48,7 +48,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-safety.ps1\"",
-            "timeout": 1
+            "timeout": 0.1
           }
         ]
       },
@@ -58,7 +58,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\read-before-edit.ps1\"",
-            "timeout": 1
+            "timeout": 0.1
           }
         ]
       }
@@ -81,7 +81,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\track-reads.ps1\"",
-            "timeout": 1,
+            "timeout": 0.1,
             "runInBackground": true
           }
         ]
@@ -125,7 +125,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\tool-failure-log.ps1\"",
-            "timeout": 1,
+            "timeout": 0.1,
             "runInBackground": true
           },
           {
@@ -149,7 +149,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\friction-detect.ps1\" -prompt \"${prompt}\"",
-            "timeout": 1
+            "timeout": 0.1
           },
           {
             "type": "command",
@@ -164,7 +164,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\echo-of-prompt.ps1\" -prompt \"${prompt}\"",
-            "timeout": 1
+            "timeout": 0.15
           },
           {
             "type": "command",
@@ -188,12 +188,12 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\auto-distill.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\memory-score.ps1\" -RecordAccess:`$false",
-            "timeout": 2
+            "timeout": 0.5
           },
           {
             "type": "command",
@@ -231,7 +231,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\evolve.ps1\"",
-            "timeout": 2
+            "timeout": 0.55
           },
           {
             "type": "command",
@@ -252,13 +252,13 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\quick-evolve.ps1\"",
-            "timeout": 1,
+            "timeout": 0.3,
             "runInBackground": true
           },
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\loop-guard.ps1\"",
-            "timeout": 1
+            "timeout": 0.1
           }
         ]
       }
@@ -269,7 +269,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\git-snapshot.ps1\" -Message \"session-end\"",
-            "timeout": 2
+            "timeout": 0.6
           },
           {
             "type": "command",
@@ -303,7 +303,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-stop.ps1\"",
-            "timeout": 1
+            "timeout": 0.2
           }
         ]
       }
@@ -348,7 +348,7 @@
           {
             "type": "command",
             "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\hooks\\subagent-start.ps1\"",
-            "timeout": 1
+            "timeout": 0.25
           }
         ]
       }
@@ -379,50 +379,6 @@
   "skipWorkflowUsageWarning": true,
   "skipAutoPermissionPrompt": true,
   "skipBypassPermissionsModePrompt": true,
-  "mcpServers": {
-    "linear": {
-      "type": "http",
-      "url": "https://mcp.linear.app/mcp",
-      "headers": {
-        "Authorization": "Bearer ${LINEAR_MCP_TOKEN}"
-      }
-    },
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    },
-    "serena": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
-        "start-mcp-server"
-      ]
-    },
-    "obsidian": {
-      "type": "http",
-      "url": "http://localhost:27123/",
-      "headers": {
-        "Authorization": "Bearer ${OBSIDIAN_MCP_TOKEN}"
-      }
-    },
-    "tabby": {
-      "type": "sse",
-      "url": "http://localhost:3001/sse"
-    },
-    "clast": {
-      "command": "clast-ai"
-    },
-    "gortex": {
-      "command": "gortex",
-      "args": [
-        "serve",
-        "--mcp"
-      ]
-    }
-  },
+  "mcpServers": {},
   "skipDangerousModePermissionPrompt": true
 }
