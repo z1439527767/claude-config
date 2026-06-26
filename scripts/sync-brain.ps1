@@ -169,7 +169,10 @@ if (Test-Path $sessionEnv) {
         $childFiles.Count -eq 0
     }
     if ($emptyDirs -and $emptyDirs.Count -gt 0) {
-        $issues += "[session-bloat] $($emptyDirs.Count) empty dirs in session-env/"
+        # Feed KG signal (drift detected)
+    . "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+    Write-KgSignal -Source "sync-brain" -EntityName "drift-$((Get-Date).ToString('yyyyMMdd'))" -EntityType "system-drift" -Observations @($issues[-1]) -Priority "high"
+    $issues += "[session-bloat] $($emptyDirs.Count) empty dirs in session-env/"
     }
 }
 
@@ -204,7 +207,10 @@ if ($Fix -and $issues.Count -gt 0) {
             @(Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue).Count -eq 0
         } | ForEach-Object {
             Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
-            $fixed += "[auto-fix] removed empty session dir: $($_.Name)"
+            # Feed KG signal (auto-fixed)
+    . "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+    Write-KgSignal -Source "sync-brain" -EntityName "fix-$((Get-Date).ToString('yyyyMMdd'))" -EntityType "auto-fix" -Observations @($issue) -Priority "normal"
+        $fixed += "[auto-fix] removed empty session dir: $($_.Name)"
         }
         $issues = $issues | Where-Object { $_ -notmatch 'session-bloat' }
     }
@@ -216,7 +222,10 @@ if ($Fix -and $issues.Count -gt 0) {
             git -C "$HomeDir/.claude" add -A 2>$null
             $msg = $status -join '; '
             git -C "$HomeDir/.claude" commit -m "auto: sync-brain fix — $msg" 2>$null
-            $fixed += "[auto-fix] committed dirty files"
+            # Feed KG signal (auto-fixed)
+    . "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+    Write-KgSignal -Source "sync-brain" -EntityName "fix-$((Get-Date).ToString('yyyyMMdd'))" -EntityType "auto-fix" -Observations @($issue) -Priority "normal"
+        $fixed += "[auto-fix] committed dirty files"
             $issues = $issues | Where-Object { $_ -notmatch 'git-dirty' }
         }
     }

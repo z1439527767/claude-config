@@ -64,7 +64,10 @@ if ($issues.Count -gt 0) {
     $fname = Split-Path $filePath -Leaf
     Write-Output "[ps-lint] $($fname): $($issues -join '; ')"
 
-    # Feed into evolution pipeline: write friction event so L1 can detect patterns
+    # Feed KG signal (hook→brain bridge)
+    . "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+    Write-KgSignal -Source "ps-lint" -EntityName "issue-$fname" -EntityType "code-issue" -Observations $issues -Priority "low"
+# Feed into evolution pipeline: write friction event so L1 can detect patterns
     $frictionDir = "$env:USERPROFILE\.claude\.claude\tellonce-state\friction"
     if (-not (Test-Path $frictionDir)) { try { New-Item -ItemType Directory -Force $frictionDir | Out-Null } catch {} }
     $event = @{

@@ -77,6 +77,12 @@ foreach ($entry in $entries) {
     if ($daysSinceLastAccess -ge 60) { $score = $score * 0.5 }
     $score = [math]::Round($score, 2)
 
+    # Feed KG signal for stale/expiring memories
+    if ($tag -eq "stale" -or $tag -eq "expired") {
+        . "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+        Write-KgSignal -Source "memory-score" -EntityName $entry.id -EntityType "memory-entry" `
+            -Observations @("Score: $scoreStr ($tag) — created $([math]::Round($daysSinceCreation,0))d ago") -Priority "low"
+    }
     $tag = if ($score -ge 0.8) { "fresh" } elseif ($score -ge 0.5) { "aging" } elseif ($score -ge 0.3) { "stale" } else { "expired" }
     $scoreStr = "{0:N2}" -f $score
     $lines[$entry.lineIndex] = "- [$($entry.id)]($($entry.path)) — $($entry.description) [$scoreStr $tag]"
