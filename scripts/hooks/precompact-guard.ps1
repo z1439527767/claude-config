@@ -3,6 +3,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "precompact-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 $guard = @"
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "precompact-guard" -EntityName "hook-precompact-guard-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("precompact-guard executed at $(Get-Date -Format 'o')") -Priority "low"
 POST-COMPACT RULES STILL ACTIVE:
 1. No verification = not done. External evidence only.
 2. Do exactly X, don't expand to other tasks.

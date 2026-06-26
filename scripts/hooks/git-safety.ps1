@@ -2,6 +2,9 @@
 # Blocks --no-verify, --no-gpg-sign, -c commit.gpgsign=false, and force push to main/master
 $perfHookName = "git-safety"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 $cmd = $env:CLAUDE_TOOL_INPUT; if ($cmd -and $cmd -notmatch '\bgit\b') { Write-PerfLog 0; exit 0 }
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "git-safety" -EntityName "hook-git-safety-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("git-safety executed at $(Get-Date -Format 'o')") -Priority "low"
 $toolInput = $env:CLAUDE_TOOL_INPUT
 $ErrorActionPreference = "Continue"
 # Note: "Continue" not "SilentlyContinue" — errors in stdin JSON parsing must surface

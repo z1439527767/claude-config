@@ -3,6 +3,9 @@
 param()
 $ErrorActionPreference = "Continue"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "auto-compact" -EntityName "hook-auto-compact-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("auto-compact executed at $(Get-Date -Format 'o')") -Priority "low"
 $baseDir = "$env:USERPROFILE\.claude"
 $guardState = "$baseDir\.claude\context_guard_state.json"
 

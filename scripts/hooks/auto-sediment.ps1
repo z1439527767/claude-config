@@ -5,6 +5,9 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "auto-sediment"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "auto-sediment" -EntityName "hook-auto-sediment-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("auto-sediment executed at $(Get-Date -Format 'o')") -Priority "low"
 if ($env:STOP_HOOK_ACTIVE -eq "1") { Write-PerfLog 0; exit 0 }
 
 $sessionMarker = "$env:USERPROFILE\.claude\.claude\session_start_time"

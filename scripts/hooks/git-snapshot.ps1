@@ -6,6 +6,9 @@ param(
 $ErrorActionPreference = "Continue"
 $perfHookName = "git-snapshot"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "git-snapshot" -EntityName "hook-git-snapshot-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("git-snapshot executed at $(Get-Date -Format 'o')") -Priority "low"
 
 $claudeDir = "$env:USERPROFILE\.claude"
 $snapshotLog = "$env:USERPROFILE\.claude\.claude\snapshot_log.jsonl"

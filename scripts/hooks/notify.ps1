@@ -3,6 +3,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "notify"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "notify" -EntityName "hook-notify-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("notify executed at $(Get-Date -Format 'o')") -Priority "low"
 # ── Read notification context from stdin ──
 $message = $null
 $notificationType = "info"

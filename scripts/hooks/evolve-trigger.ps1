@@ -4,6 +4,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "evolve-trigger"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "evolve-trigger" -EntityName "hook-evolve-trigger-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("evolve-trigger executed at $(Get-Date -Format 'o')") -Priority "low"
 # Only run if evolution engine exists
 $engineScript = "$env:USERPROFILE\.claude\scripts\ralph-evolve-model.py"
 if (-not (Test-Path $engineScript)) { exit 0 }

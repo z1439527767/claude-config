@@ -3,6 +3,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "subagent-start"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "subagent-start" -EntityName "hook-subagent-start-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("subagent-start executed at $(Get-Date -Format 'o')") -Priority "low"
 $logDir = "$env:USERPROFILE\.claude\.claude\subagent_logs"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force $logDir | Out-Null }
 

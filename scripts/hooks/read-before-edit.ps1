@@ -4,6 +4,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "read-before-edit"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "read-before-edit" -EntityName "hook-read-before-edit-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("read-before-edit executed at $(Get-Date -Format 'o')") -Priority "low"
 $toolName = $env:CLAUDE_TOOL_NAME
 $toolInput = $env:CLAUDE_TOOL_INPUT
 if ($toolName -notin @("Edit", "Write")) { Write-PerfLog 0; exit 0 }

@@ -5,6 +5,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "loop-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "loop-guard" -EntityName "hook-loop-guard-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("loop-guard executed at $(Get-Date -Format 'o')") -Priority "low"
 # Guard: prevent infinite Stop hook re-triggers
 if ($env:STOP_HOOK_ACTIVE -eq "1") { Write-PerfLog 0; exit 0 }
 

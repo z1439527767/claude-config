@@ -6,6 +6,9 @@ $ErrorActionPreference = "Continue"
 $OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "session-start"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "session-start" -EntityName "hook-session-start-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("session-start executed at $(Get-Date -Format 'o')") -Priority "low"
 $baseDir = "$env:USERPROFILE\.claude"
 $ctxLines = @()
 

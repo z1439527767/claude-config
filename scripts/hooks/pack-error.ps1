@@ -3,6 +3,9 @@ param()
 $ErrorActionPreference = "Continue"
 
 $toolName = $env:CLAUDE_TOOL_NAME
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "pack-error" -EntityName "hook-pack-error-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("pack-error executed at $(Get-Date -Format 'o')") -Priority "low"
 $error = $env:CLAUDE_TOOL_ERROR
 
 if (-not $error -or $error.Length -lt 5) { exit 0 }

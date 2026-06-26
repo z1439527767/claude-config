@@ -5,6 +5,9 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "metacog-bridge"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "metacog-bridge" -EntityName "hook-metacog-bridge-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("metacog-bridge executed at $(Get-Date -Format 'o')") -Priority "low"
 $now = Get-Date
 $projDir = "$env:USERPROFILE\.claude"
 $learningsGlobal = "$env:USERPROFILE\.claude\metacog-learnings.jsonl"

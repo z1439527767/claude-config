@@ -3,6 +3,9 @@
 param($prompt)
 $ErrorActionPreference = "Continue"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "frustration-watch" -EntityName "hook-frustration-watch-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("frustration-watch executed at $(Get-Date -Format 'o')") -Priority "low"
 if (-not $prompt -or $prompt.Length -lt 5) { exit 0 }
 
 $reportFile = "$env:USERPROFILE\.claude\session-env\frustration.json"

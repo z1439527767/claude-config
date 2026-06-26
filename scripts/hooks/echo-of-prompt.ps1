@@ -6,6 +6,9 @@ param(
 $ErrorActionPreference = "Continue"
 $perfHookName = "echo-of-prompt"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "echo-of-prompt" -EntityName "hook-echo-of-prompt-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("echo-of-prompt executed at $(Get-Date -Format 'o')") -Priority "low"
 $taskFile = "$env:USERPROFILE\.claude\.claude\task-context.md"
 $stateFile = "$env:USERPROFILE\.claude\.claude\echo_state.json"
 $echoInterval = [int]$env:CLAUDE_FOCUS_ECHO_INTERVAL

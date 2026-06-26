@@ -3,6 +3,9 @@
 param()
 $ErrorActionPreference = "Continue"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "circuit-guard" -EntityName "hook-circuit-guard-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("circuit-guard executed at $(Get-Date -Format 'o')") -Priority "low"
 $lib = "$env:USERPROFILE\.claude\scripts\lib\circuit-breaker.ps1"
 if (-not (Test-Path $lib)) { exit 0 }
 

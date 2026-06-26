@@ -5,6 +5,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "compact-remind"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "compact-remind" -EntityName "hook-compact-remind-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("compact-remind executed at $(Get-Date -Format 'o')") -Priority "low"
 # Estimate context length from conversation turns (crude but fast)
 $sessionDir = "$env:USERPROFILE\.claude\.claude\session_history"
 $turnCount = 0

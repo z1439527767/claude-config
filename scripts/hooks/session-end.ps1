@@ -4,6 +4,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "session-end"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "session-end" -EntityName "hook-session-end-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("session-end executed at $(Get-Date -Format 'o')") -Priority "low"
 
 $baseDir = "$env:USERPROFILE\.claude"
 

@@ -3,6 +3,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "tool-failure-log"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "tool-failure-log" -EntityName "hook-tool-failure-log-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("tool-failure-log executed at $(Get-Date -Format 'o')") -Priority "low"
 $logDir = "$env:USERPROFILE\.claude\.claude\tool_failures"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Force $logDir | Out-Null }
 

@@ -4,6 +4,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "subagent-stop"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "subagent-stop" -EntityName "hook-subagent-stop-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("subagent-stop executed at $(Get-Date -Format 'o')") -Priority "low"
 
 # The hook receives subagent info via environment or stdin
 $agentType = if ($env:SUBAGENT_TYPE) { $env:SUBAGENT_TYPE } else { "unknown" }
