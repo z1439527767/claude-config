@@ -69,4 +69,7 @@ if ($recentFailures.Count -ge 3) {
     }
 }
 
+# ── Error budget: record failure ──
+try { & "$env:USERPROFILE\.claude\scripts\lib\error-budget.ps1" -Action record_failure 2>$null | Out-Null } catch {}
+
 Write-PerfLog 0; exit 0

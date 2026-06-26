@@ -132,4 +132,7 @@ if ($ctxLines.Count -gt 0) {
     Write-Output $statusMsg
 }
 
+# ── Error budget: record session start as success ──
+try { & "$env:USERPROFILE\.claude\scripts\lib\error-budget.ps1" -Action record_success 2>$null | Out-Null } catch {}
+
 if ($errors.Count -gt 0) { Write-PerfLog 1; exit 1 } else { Write-PerfLog 0; exit 0 }

@@ -148,4 +148,12 @@ foreach ($p in $tmpPatterns) {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
+# ── Error budget status ──
+try {
+    $budgetStatus = & "$env:USERPROFILE\.claude\scripts\lib\error-budget.ps1" -Action check 2>$null
+    if ($budgetStatus.burn_alert -ne "none") {
+        Write-Output "ERROR_BUDGET: $($budgetStatus.burn_alert) burn — $($budgetStatus.budget_consumed_pct)% budget consumed, $($budgetStatus.total_events) events"
+    }
+} catch {}
+
 Write-PerfLog 0; exit 0
