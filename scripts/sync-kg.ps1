@@ -17,16 +17,27 @@ $signals = @(Get-Content $signalFile -Encoding UTF8 -ErrorAction SilentlyContinu
     ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } |
     Where-Object { $_ })
 
+if ($signals.Count -eq 0) {
+    if ($Stats) { Write-Output "kg-signals: 0 pending" }
+    exit 0
+}
+
+# -Consume: archive signals before anything else (so stats reflect pre-consume state)
+if ($Consume) {
+    Get-Content $signalFile -Encoding UTF8 | Add-Content $consumedFile -Encoding UTF8
+    $tmp = "$signalFile.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+    try { [IO.File]::WriteAllText($tmp, '', [Text.UTF8Encoding]::new($false)); Move-Item -Force $tmp $signalFile } catch {}
+}
+
+# -Stats: show summary after optional consume
 if ($Stats) {
     $bySource = $signals | Group-Object source | ForEach-Object { "$($_.Name): $($_.Count)" }
-    Write-Output "kg-signals: $($signals.Count) pending"
+    Write-Output "kg-signals: $($signals.Count) consumed"
     if ($bySource) { $bySource | ForEach-Object { Write-Output "  $_" } }
     exit 0
 }
 
-if ($signals.Count -eq 0) { exit 0 }
-
-# Format for LLM: each signal is a ready-to-use KG operation
+# Default (no -Consume, no -Stats): format for LLM consumption → KG push
 $output = @()
 foreach ($s in $signals) {
     $output += @{
@@ -41,11 +52,3 @@ foreach ($s in $signals) {
 }
 
 $output | ConvertTo-Json -Depth 4
-
-if ($Consume) {
-    # Move processed signals to consumed log
-    Get-Content $signalFile -Encoding UTF8 | Add-Content $consumedFile -Encoding UTF8
-    # Atomic truncate
-    $tmp = "$signalFile.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
-    try { "" | Set-Content $tmp -Encoding UTF8; Move-Item -Force $tmp $signalFile } catch {}
-}
