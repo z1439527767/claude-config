@@ -166,10 +166,8 @@ def main():
         print(f"  Hooks:   {results['hooks']['total']} scripts, {len(results['hooks']['heavy'])} heavy (>200 lines)")
         for h in results['hooks']['heavy']:
             print(f"           - {h['name']}: {h['lines']} lines")
-        print(f"  Evo:     {results['evolution'].get('cycles',0)} cycles ({results['evolution'].get('recent_24h',0)} in 24h)")
         print(f"  Memory:  {results['memory'].get('total_files',0)} files")
         print(f"  Failures:{results['failures'].get('recent_24h',0)} in 24h")
-        print(f"  Strategy:{results['strategy']['strategy']}")
 
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')

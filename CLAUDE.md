@@ -63,7 +63,7 @@
 - 配置改 settings.json/CLAUDE.md/AGENTS.md，项目代码改对应项目文件。
 - 同错两次 → 立即写规则。同任务三次 → 写 skill。
 - **不许过度抽象。单一用途不需要接口/基类/工厂。能一行不写三行。**
-- Hook 'evolve' timeout反复振荡——硬编码p95值，不让L3自动调
+- Hook timeout 不用算法自动调——用 perf 实测 p95 值硬编码
 
 ## 3. 执行规则
 @.claude/rules/tools.md        — 工具·并行·错误·修改·Git·自审
