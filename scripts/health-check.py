@@ -87,7 +87,8 @@ def check_evolution():
 
 def check_memory():
     """Check memory health."""
-    mem_dir = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'memory'
+    mem_dirs = list((CLAUDE / 'projects').glob('*/memory'))
+    mem_dir = mem_dirs[0] if mem_dirs else CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
     if not mem_dir.exists():
         return {'status': 'warn', 'message': 'memory dir missing'}
 
