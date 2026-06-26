@@ -241,7 +241,18 @@ if ($Fix -and $issues.Count -gt 0) {
     }
 }
 
-# ===== 7. SELF-AUDIT COMPLIANCE =====
+# ===== 7. PATTERN DETECTION (passive rules → active checks) =====
+$patternResult = & "$HomeDir/.claude/scripts/pattern-detector.ps1" -Quiet
+if ($LASTEXITCODE -ne 0) {
+    # pattern-detector found issues — they're already logged to kg_signals.jsonl
+    # Just note it for sync-brain visibility
+    $patternIssues = @($patternResult | Where-Object { $_ -match '^\s*!' })
+    if ($patternIssues.Count -gt 0) {
+        $issues += "[pattern-signal] $($patternIssues.Count) passive→active pattern(s) detected"
+    }
+}
+
+# ===== 8. SELF-AUDIT COMPLIANCE =====
 $auditStateFile = "$HomeDir/.claude/.claude/audit_state.json"
 if (Test-Path $auditStateFile) {
     try {
