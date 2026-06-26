@@ -5,6 +5,22 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "evolve"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Concurrent-safety: flock via temp file. No two evolves run simultaneously.
+$lockFile = "$env:USERPROFILE\.claude\.claude\evo.lock"
+if (Test-Path $lockFile) {
+    $lockAge = (Get-Date) - (Get-Item $lockFile).LastWriteTime
+    if ($lockAge.TotalMinutes -lt 10) {
+        Write-Output "EVOLVE: locked (another evolve running, $([math]::Round($lockAge.TotalSeconds))s ago)"
+        Write-PerfLog 0; exit 0
+    }
+    # Stale lock (>10 min) — previous evolve crashed, clean up and proceed
+    Remove-Item $lockFile -Force -ErrorAction SilentlyContinue
+}
+try { New-Item -ItemType File $lockFile -Force | Out-Null } catch {
+    Write-Output "EVOLVE: cannot create lock file: $_"
+    Write-PerfLog 1; exit 1
+}
+
 $script:applied = @()
 $script:changes = @()
 $libDir = "$env:USERPROFILE\.claude\scripts\lib"
@@ -75,5 +91,8 @@ if (Test-Path $perfDir) {
         Where-Object { $_.Length -gt 500000 } |
         ForEach-Object { $keep = Get-Content $_.FullName -Tail 100 -Encoding UTF8; $keep | Set-Content $_.FullName -Encoding UTF8 }
 }
+
+# Release concurrent-safety lock (set at script start)
+if (Test-Path $lockFile) { Remove-Item $lockFile -Force -ErrorAction SilentlyContinue }
 
 Write-PerfLog 0; exit 0

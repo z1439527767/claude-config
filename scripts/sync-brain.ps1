@@ -13,7 +13,12 @@ $HomeDir = $env:USERPROFILE
 $rulesDir = "$HomeDir/.claude/.claude/rules"
 $claudeMd = "$HomeDir/.claude/CLAUDE.md"
 $settingsPath = "$HomeDir/.claude/settings.json"
-$memoryIndex = "$HomeDir/.claude/projects/C--Users-z1439--claude/memory/MEMORY.md"
+# Detect memory dir dynamically (don't hardcode username)
+$memoryIndex = Get-ChildItem "$HomeDir/.claude/projects" -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Join-Path $_.FullName "memory/MEMORY.md" } |
+    Where-Object { Test-Path $_ } |
+    Select-Object -First 1
+if (-not $memoryIndex) { $memoryIndex = "$HomeDir/.claude/projects/C--Users-$env:USERNAME--claude/memory/MEMORY.md" }
 $sessionEnv = "$HomeDir/.claude/session-env"
 
 # ===== 1. CRITICAL FILES =====
@@ -117,10 +122,14 @@ if (Test-Path $settingsPath) {
                 foreach ($entry in $settings.hooks.($event.Name)) {
                     foreach ($h in $entry.hooks) {
                         $hookCount++
-                        if ($h.command -match 'z1439\\(?:\\.claude\\)?(scripts\\(?:hooks\\)?([^" ]+\.ps1))') {
-                            $scriptPath = "$HomeDir/.claude/$($Matches[1])"
-                            if (-not (Test-Path $scriptPath)) {
-                                $missingScripts += $Matches[1]
+                        # Match both scripts\hooks\X.ps1 and scripts\X.ps1 paths (dynamic username)
+                        $escapedHome = [regex]::Escape("$env:USERNAME\.claude\scripts\")
+                        if ($h.command -match ($escapedHome + '(?:hooks\\)?([^" ]+\.ps1)')) {
+                            $fname = $Matches[1]
+                            $spHook = "$HomeDir/.claude/scripts/hooks/$fname"
+                            $spRoot = "$HomeDir/.claude/scripts/$fname"
+                            if (-not (Test-Path $spHook) -and -not (Test-Path $spRoot)) {
+                                $missingScripts += $fname
                             }
                         }
                     }

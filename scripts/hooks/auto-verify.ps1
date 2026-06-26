@@ -119,7 +119,7 @@ foreach ($e in $errors) {
     # Level 3b: Apply + re-validate
     $fixOk = $false
     try {
-        Set-Content $e.file -Value $newContent -Encoding UTF8 -NoNewline
+        [IO.File]::WriteAllText($e.file, $newContent, [Text.UTF8Encoding]::new($false))
         switch ($e.type) {
             "py" { python -m py_compile $e.file 2>&1 | Out-Null; $fixOk = ($LASTEXITCODE -eq 0) }
             "json" { python -c "import json, sys; json.load(open(sys.argv[1]))" $e.file 2>&1 | Out-Null; $fixOk = ($LASTEXITCODE -eq 0) }
@@ -130,7 +130,7 @@ foreach ($e in $errors) {
 
     # Level 4: Rollback — revert fix that made things worse
     if ($backup) {
-        try { Set-Content $e.file -Value $backup -Encoding UTF8 -NoNewline } catch { }
+        try { [IO.File]::WriteAllText($e.file, $backup, [Text.UTF8Encoding]::new($false)) } catch { }
         $rolledBack += @{file=$e.file; attempted=$true}
     }
     $escalated += $e
