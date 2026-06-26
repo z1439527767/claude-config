@@ -87,8 +87,7 @@
 @.claude/rules/verify.md
 @.claude/rules/thinking.md
 
-## 7. 进化 & 自监控
-@.claude/rules/evolution.md      — 进化策略：preset → 闭环 → 验证 → 回滚
+## 7. 自监控
 @.claude/rules/memory-layers.md  — 五层记忆：L0 元规则 → L4 会话归档
 scripts/health-check.py / sense-signals.py — 健康仪表板 + 挫败感知
 
