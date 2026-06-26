@@ -2,7 +2,7 @@
 # Can be run directly: pwsh -ExecutionPolicy Bypass -File memory-score.ps1
 # Or called from other hooks: & pwsh -File "...memory-score.ps1"
 param(
-    [string]$MemoryDir = "$env:USERPROFILE\.claude\projects\C--Users-z1439--claude\memory",
+    [string]$MemoryDir = "$env:USERPROFILE\.claude\projects\C--Users-$env:USERNAME--claude\memory",
     [string]$StateFile = "$env:USERPROFILE\.claude\.claude\memory_scores.json",
     [switch]$RecordAccess = $true
 )

@@ -84,6 +84,7 @@ foreach ($e in $errors) {
     $fp = $e.file -replace '\\', '/'
 
     # Level 1: Retry — re-validate (catches transient parse failures)
+    # Retry delay — transient parse failures benefit from brief wait allowing filesystem to settle
     Start-Sleep -Milliseconds 100
     $retryOk = $false
     switch ($e.type) {

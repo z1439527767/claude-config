@@ -3,7 +3,8 @@
 $perfHookName = "git-safety"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 $cmd = $env:CLAUDE_TOOL_INPUT; if ($cmd -and $cmd -notmatch '\bgit\b') { Write-PerfLog 0; exit 0 }
 $toolInput = $env:CLAUDE_TOOL_INPUT
-$ErrorActionPreference = "SilentlyContinue"
+$ErrorActionPreference = "Continue"
+# Note: "Continue" not "SilentlyContinue" — errors in stdin JSON parsing must surface
 if (-not $toolInput) {
     try {
         $stdin = [Console]::In.ReadToEnd()

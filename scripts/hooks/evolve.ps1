@@ -53,7 +53,11 @@ if ($allChanges.Count -gt 0) {
     }
 
     $logLines = @(Get-Content $evolveLog -Encoding UTF8 | Where-Object { $_ })
-    if ($logLines.Count -gt 100) { $logLines[-80..-1] | Set-Content $evolveLog -Encoding UTF8 }
+    if ($logLines.Count -gt 100) {
+        $keep = $logLines[-80..-1]
+        $tmpLog = "$evolveLog.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+        try { $keep | Set-Content $tmpLog -Encoding UTF8; Move-Item -Force $tmpLog $evolveLog } catch { if (Test-Path $tmpLog) { Remove-Item $tmpLog -Force -ErrorAction SilentlyContinue } }
+    }
 }
 
 if ($script:applied.Count -gt 0) {
