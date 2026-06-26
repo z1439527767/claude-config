@@ -86,7 +86,7 @@ if ($script:applied.Count -gt 0) {
     if (Test-Path $snapshotScript) {
         $changeSummary = ($allChanges -join "; ")
         if ($changeSummary.Length -gt 200) { $changeSummary = $changeSummary.Substring(0, 200) + "…" }
-        & pwsh -ExecutionPolicy Bypass -File $snapshotScript -Message "evo: $changeSummary" 2>$null
+        & pwsh -ExecutionPolicy Bypass -File $snapshotScript -Message "evo: $changeSummary" 2>&1 | Out-Null
     }
 
     $msg = ($allChanges | ForEach-Object { "  $_" }) -join "`n"

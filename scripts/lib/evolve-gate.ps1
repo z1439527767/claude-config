@@ -40,6 +40,6 @@ if ($script:canEvolve) {
 
     $snapshotScript = "$env:USERPROFILE\.claude\scripts\hooks\git-snapshot.ps1"
     if (Test-Path $snapshotScript) {
-        & pwsh -ExecutionPolicy Bypass -File $snapshotScript -Message "pre-evolution" 2>$null
+        & pwsh -ExecutionPolicy Bypass -File $snapshotScript -Message "pre-evolution" 2>&1 | Out-Null
     }
 }
