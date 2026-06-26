@@ -118,7 +118,7 @@ TOOL_KNOWLEDGE = [
     ("进化闸门参数", "最小间隔30s，7天最大20次。策略preset:balanced/harden/innovate/repair-only"),
     ("熔断器模式", "CLOSED→OPEN→HALF_OPEN状态机，5次失败自动断。z-score频率+熵检测防隧道视野"),
     ("Ebbinghaus遗忘曲线评分", "score=e^(-days/30)+min(access*0.05,0.3)+recency_boost+success_boost。30天半衰期，60天未访问加速衰减"),
-    ("MCP工具生态", "ComfyUI(图像生成+工作流管理)、Memory(知识图谱实体关系)、Context7(文档检索)、SequentialThinking(多步推理)、Gigs.sh(AI agent平台发现)"),
+    ("MCP工具生态", "Memory(知识图谱实体关系)、Context7(文档检索)、SequentialThinking(多步推理)、Gigs.sh(AI agent平台发现)"),
     ("Windows编码陷阱", "cp1252不能编码CJK→所有Python脚本需要io.TextIOWrapper(stdout.buffer,encoding='utf-8')。PowerShell需要[Console]::OutputEncoding=[Text.Encoding]::UTF8"),
     ("PowerShell避坑清单", "??用if/else替代、管道到native exe丢CJK→用参数模式、<是PS7保留字、@(a -flag,b -flag)是错误数组语法、New-Item -Force截断已有文件"),
     ("Ralph进化五层", "L0元规则(永不过期)→L1路由索引(7天)→L2全局事实(30天)→L3任务技能(永久)→L4会话归档(90天)。新能力从L4提纯到L0"),
@@ -249,7 +249,7 @@ def expand():
                   "核心：自治、不撒谎、干实事。永不停。\n"
                   "架构：五层记忆(L0-L4) + OODA问题解决 + RETRY→FIX→ROLLBACK→ESCALATE错误恢复\n"
                   "能力：RAG混合检索、事件溯源回滚、自评估基准、跨模型审查、知识图谱语义搜索\n"
-                  "工具：ComfyUI图像生成、MCP协议、LangChain RAG模式、OpenHands事件溯源\n"
+                  "工具：MCP协议、知识图谱语义搜索、LangChain RAG模式、OpenHands事件溯源\n"
                   "进化：friction信号→规则提取→自动应用到CLAUDE.md。同错两次写规则，同任务三次写skill\n"
                   "原则：专用工具优先、能并行不串行、读过后再改、改过必验、修就修根因"
     })

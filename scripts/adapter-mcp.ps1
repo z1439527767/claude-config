@@ -13,31 +13,6 @@ $ErrorActionPreference = "Continue"
 # MCP tool catalog — initialized in a function to avoid script-top parsing issues
 function Get-McpCatalog {
     $catalog = @{}
-    $catalog["comfyui"] = @{
-        description = "ComfyUI Stable Diffusion workflow management"
-        tools = @(
-            @{name="generate_image"; desc="Generate image from text prompt"; category="generation"},
-            @{name="enqueue_workflow"; desc="Submit workflow for execution"; category="execution"},
-            @{name="get_job_status"; desc="Check job execution status"; category="monitor"},
-            @{name="get_history"; desc="Get execution history with outputs"; category="monitor"},
-            @{name="list_local_models"; desc="List installed model files"; category="inventory"},
-            @{name="search_models"; desc="Search HuggingFace for models"; category="discovery"},
-            @{name="download_model"; desc="Download model from URL"; category="install"},
-            @{name="install_custom_node"; desc="Install custom node pack"; category="install"},
-            @{name="get_workflow"; desc="Load saved workflow JSON"; category="workflow"},
-            @{name="save_workflow"; desc="Save workflow to user library"; category="workflow"},
-            @{name="validate_workflow"; desc="Validate without executing"; category="workflow"},
-            @{name="analyze_workflow"; desc="Analyze workflow structure"; category="workflow"},
-            @{name="get_system_stats"; desc="GPU/VRAM/system info"; category="monitor"},
-            @{name="start_comfyui"; desc="Start ComfyUI process"; category="control"},
-            @{name="stop_comfyui"; desc="Stop ComfyUI process"; category="control"},
-            @{name="restart_comfyui"; desc="Restart ComfyUI process"; category="control"},
-            @{name="upload_image"; desc="Upload image to input dir"; category="io"},
-            @{name="view_image"; desc="View generated image inline"; category="io"},
-            @{name="get_image"; desc="Download generated image"; category="io"},
-            @{name="get_logs"; desc="Get server runtime logs"; category="debug"}
-        )
-    }
 $catalog["memory"] = @{
         description = "Knowledge graph persistent memory"
         tools = @(
@@ -130,7 +105,7 @@ if ($QuickRef) {
 ╔══════════════════════════════════════════════════════════════╗
 ║                    MCP TOOL QUICK REFERENCE                   ║
 ╠══════════════════════════════════════════════════════════════╣
-║ comfyui (20)     — Image gen, workflows, models              ║
+║ memory (9)       — Knowledge graph, entities, observations    ║
 ║ memory  (9)      — Knowledge graph CRUD                      ║
 ║ gigs-sh (7)      — Agent platform directory                  ║
 ║ context7 (2)     — Library documentation                     ║
@@ -141,7 +116,7 @@ if ($QuickRef) {
 ║   Memory:  search_nodes → open_nodes → create_entities
 ║   Discover: search_gigs → get_gig
 ║   Docs:     resolve-library-id → query-docs
-║   Debug:    get_logs → get_system_stats → restart_comfyui
+║   Debug:    get_logs → get_system_stats
 ╚══════════════════════════════════════════════════════════════╝
 
 "@

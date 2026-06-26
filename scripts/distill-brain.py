@@ -8,7 +8,7 @@ Sources distilled:
 - 30+ scripts (tool APIs, workflows)
 - Evolution patterns (L1-L5 strategies)
 - Hook system (30 hooks, their triggers and purposes)
-- MCP tools (ComfyUI, memory, context7, etc.)
+- MCP tools (memory, context7, sequential-thinking, etc.)
 - RAG pipeline (rewrite, hybrid, evaluate)
 - OpenHands patterns (event sourcing, plugin protocol, SWE-bench)
 - LangChain patterns (MultiQuery, Ensemble, RAGAS, CRAG)
@@ -195,7 +195,7 @@ def collect_tools_knowledge() -> list[dict]:
             "type": "tool_knowledge",
             "tool": "MCP Ecosystem",
             "concepts": [
-                "ComfyUI: image generation, workflow analysis, model management",
+                "MCP Protocol: standardized tool interface for external service integration",
                 "Memory (KG): entity creation, relation mapping, semantic search",
                 "Context7: documentation retrieval for any library/framework",
                 "Sequential Thinking: multi-step reasoning with revision tracking",
@@ -424,8 +424,8 @@ def generate_conversation_pairs(_all_entries: list[dict]) -> list[dict]:
     # Example: tool usage
     conversations.append({
         "messages": [
-            {"role": "user", "content": "安装 ComfyUI 的 ControlNet 节点"},
-            {"role": "assistant", "content": "使用 ComfyUI MCP 工具:\n\n1. 先搜索节点: search_custom_nodes('controlnet')\n2. 安装: install_custom_node('comfyui-controlnet-aux')\n3. 下载模型: download_model(url='...', target_subfolder='controlnet')\n4. 重启 ComfyUI: restart_comfyui()\n\n执行中..."},
+            {"role": "user", "content": "安装项目需要的 MCP 工具包"},
+            {"role": "assistant", "content": "使用 MCP 协议:\n\n1. 先从 marketplace 搜索: search for matching tools\n2. 安装: install via plugin manager\n3. 配置: add to project .mcp.json\n4. 验证: test tool connectivity\n\n执行中..."},
         ],
     })
 
