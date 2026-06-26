@@ -172,7 +172,7 @@ if (Test-Path $sessionEnv) {
         # Track recurring empty dirs: known harness dirs = silent cleanup, new ones = flag
         $knownFile = "$env:USERPROFILE\.claude\.claude\known_empty_dirs.json"
         $known = @{}
-        if (Test-Path $knownFile) { try { $known = Get-Content $knownFile -Raw | ConvertFrom-Json } catch {} }
+        if (Test-Path $knownFile) { try { $psObj = Get-Content $knownFile -Raw | ConvertFrom-Json; $known = @{}; foreach ($p in $psObj.PSObject.Properties) { $known[$p.Name] = [int]$p.Value } } catch {} }
         $newDirs = @()
         foreach ($d in $emptyDirs) {
             if (-not $known[$d.Name]) { $newDirs += $d; $known[$d.Name] = 1 }
