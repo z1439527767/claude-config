@@ -241,7 +241,22 @@ if ($Fix -and $issues.Count -gt 0) {
     }
 }
 
-# ===== OUTPUT =====
+# ===== 7. SELF-AUDIT COMPLIANCE =====
+$auditStateFile = "$HomeDir/.claude/.claude/audit_state.json"
+if (Test-Path $auditStateFile) {
+    try {
+        $auditState = Get-Content $auditStateFile -Raw | ConvertFrom-Json
+        $lastAudit = [DateTime]::Parse($auditState.last_audit)
+        $elapsed = (Get-Date) - $lastAudit
+        if ($elapsed.TotalHours -gt 1) {
+            $issues += "[audit-overdue] Last self-audit was $([Math]::Round($elapsed.TotalHours,1))h ago (streak=$($auditState.streak))"
+        }
+    } catch {}
+} else {
+    $issues += "[audit-missing] No audit state file — self-audit never ran"
+}
+
+# ===== OUTPUT ====
 if (-not $Quiet) {
     if ($fixed.Count -gt 0) {
         Write-Output "[sync-brain] FIXED: $($fixed.Count) issue(s)"
