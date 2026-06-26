@@ -30,7 +30,7 @@ if (Test-Path $StateFile) {
 }
 
 $memContent = Get-Content $memIndex -Raw -Encoding UTF8
-$lines = $memContent -split "`n"
+$lines = $memContent -split "`n" | ForEach-Object { $_ -replace "`r$", "" }
 $entries = @()
 
 for ($i = 0; $i -lt $lines.Count; $i++) {
