@@ -3,9 +3,6 @@
 param()
 $ErrorActionPreference = "Continue"
 
-# Feed KG signal (hook→brain bridge)
-. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
-Write-KgSignal -Source "rogue-detector" -EntityName "hook-rogue-detector-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("rogue-detector executed at $(Get-Date -Format 'o')") -Priority "low"
 $stateFile = "$env:USERPROFILE\.claude\session-env\rogue_state.json"
 $allowedTools = @('Read','Write','Edit','Bash','PowerShell','Glob','Grep','WebFetch','WebSearch',
     'TaskCreate','TaskUpdate','Agent','Skill','Workflow','AskUserQuestion','mcp__memory__*','mcp__comfyui__*')

@@ -8,9 +8,6 @@ param(
 $ErrorActionPreference = "Continue"
 $perfHookName = "pre-write-snapshot"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
-# Feed KG signal (hook→brain bridge)
-. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
-Write-KgSignal -Source "pre-write-snapshot" -EntityName "hook-pre-write-snapshot-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("pre-write-snapshot executed at $(Get-Date -Format 'o')") -Priority "low"
 
 # Only snapshot for Write and Edit operations
 if ($tool_name -notin @("Write", "Edit")) { exit 0 }

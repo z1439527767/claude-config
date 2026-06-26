@@ -3,9 +3,6 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "track-reads"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
-# Feed KG signal (hook→brain bridge)
-. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
-Write-KgSignal -Source "track-reads" -EntityName "hook-track-reads-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-execution" -Observations @("track-reads executed at $(Get-Date -Format 'o')") -Priority "low"
 $toolName = $env:CLAUDE_TOOL_NAME
 if ($toolName -ne "Read") { Write-PerfLog 0; exit 0 }
 
