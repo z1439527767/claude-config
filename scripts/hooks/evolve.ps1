@@ -5,6 +5,10 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "evolve"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "evolve" -EntityName "evolve-run-$(Get-Date -Format 'yyyyMMdd')" -EntityType "evolution-cycle" -Observations @("Evolution pipeline executed at $(Get-Date -Format 'o')") -Priority "normal"
+
 # Concurrent-safety: flock via temp file. No two evolves run simultaneously.
 $lockFile = "$env:USERPROFILE\.claude\.claude\evo.lock"
 if (Test-Path $lockFile) {

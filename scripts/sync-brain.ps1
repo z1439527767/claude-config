@@ -169,10 +169,20 @@ if (Test-Path $sessionEnv) {
         $childFiles.Count -eq 0
     }
     if ($emptyDirs -and $emptyDirs.Count -gt 0) {
-        # Feed KG signal (drift detected)
-    . "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
-    Write-KgSignal -Source "sync-brain" -EntityName "drift-$((Get-Date).ToString('yyyyMMdd'))" -EntityType "system-drift" -Observations @($issues[-1]) -Priority "high"
-    $issues += "[session-bloat] $($emptyDirs.Count) empty dirs in session-env/"
+        # Track recurring empty dirs: known harness dirs = silent cleanup, new ones = flag
+        $knownFile = "$env:USERPROFILE\.claude\.claude\known_empty_dirs.json"
+        $known = @{}
+        if (Test-Path $knownFile) { try { $known = Get-Content $knownFile -Raw | ConvertFrom-Json } catch {} }
+        $newDirs = @()
+        foreach ($d in $emptyDirs) {
+            if (-not $known[$d.Name]) { $newDirs += $d; $known[$d.Name] = 1 }
+            else { $known[$d.Name] += 1 }
+        }
+        $tmpKnown = "$knownFile.tmp.$([Guid]::NewGuid().ToString("N").Substring(0,8))"
+        try { $known | ConvertTo-Json | Set-Content $tmpKnown -Encoding UTF8; Move-Item -Force $tmpKnown $knownFile } catch {}
+        if ($newDirs.Count -gt 0) {
+            $issues += "[session-bloat] $($newDirs.Count) new empty dirs: $($newDirs.Name -join ", ")"
+        }
     }
 }
 
