@@ -94,7 +94,7 @@ class Verifier:
             for f in d.glob("*.py"):
                 try:
                     result = subprocess.run(
-                        ["python3", "-m", "py_compile", str(f)],
+                        ["python", "-m", "py_compile", str(f)],
                         capture_output=True, text=True, timeout=10,
                         encoding='utf-8', errors='replace'
                     )
@@ -370,7 +370,7 @@ class Verifier:
         # Knowledge graph connectivity (if available)
         try:
             result = subprocess.run(
-                ["python3", "-c", "import sys; sys.path.insert(0, '.'); "
+                ["python", "-c", "import sys; sys.path.insert(0, '.'); "
                  "print('kg: available' if __import__('json').loads('{}') is not None else 'no')"],
                 capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace'
             )

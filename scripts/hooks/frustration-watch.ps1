@@ -71,7 +71,7 @@ try {
 
     # Log to history
     $reportJson = $report | ConvertTo-Json -Compress
-    try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert frustration_history "" $reportJson 2>$null | Out-Null } catch {
+    try { python "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert frustration_history "" $reportJson 2>$null | Out-Null } catch {
         $reportJson | Add-Content $historyFile -Encoding UTF8
     }
 

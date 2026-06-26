@@ -126,7 +126,7 @@ def inject_one(key: str) -> str | None:
     import subprocess
     try:
         result = subprocess.run(
-            ["python3", str(script), "--inject"],
+            ["python", str(script), "--inject"],
             capture_output=True, text=True, timeout=5, cwd=str(BASE_DIR)
         )
         if result.returncode == 0:

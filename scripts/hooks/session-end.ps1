@@ -12,40 +12,40 @@ $baseDir = "$env:USERPROFILE\.claude"
 # ═══════════════════════════════════════════
 try {
     $diaryContent = "Session completed. $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
-    python3 "$baseDir\scripts\identity-journal.py" --entry "$diaryContent" 2>> "$baseDir\logs\session-errors.log" | Out-Null
+    python "$baseDir\scripts\identity-journal.py" --entry "$diaryContent" 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
 # PHASE 2: Subconscious — Dream Mode
 # ═══════════════════════════════════════════
 try {
-    python3 "$baseDir\scripts\subconscious.py" --mode dream 2>> "$baseDir\logs\session-errors.log" | Out-Null
+    python "$baseDir\scripts\subconscious.py" --mode dream 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
 # PHASE 3: Intuition — Rebuild Index
 # ═══════════════════════════════════════════
 try {
-    python3 "$baseDir\scripts\intuition-engine.py" --rebuild 2>> "$baseDir\logs\session-errors.log" | Out-Null
+    python "$baseDir\scripts\intuition-engine.py" --rebuild 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
 # PHASE 4: Pack Session + Sync Obsidian
 # ═══════════════════════════════════════════
 try {
-    $summary = python3 "$baseDir\scripts\session-summarizer.py" --json 2>> "$baseDir\logs\session-errors.log"
+    $summary = python "$baseDir\scripts\session-summarizer.py" --json 2>> "$baseDir\logs\session-errors.log"
     if ($LASTEXITCODE -eq 0 -and $summary) {
-        $summary | python3 "$baseDir\scripts\data-pack.py" --type session --source "session-summarizer" 2>> "$baseDir\logs\session-errors.log" | Out-Null
+        $summary | python "$baseDir\scripts\data-pack.py" --type session --source "session-summarizer" 2>> "$baseDir\logs\session-errors.log" | Out-Null
     }
 } catch {}
 
 try {
-    python3 "$baseDir\scripts\packed-retrieve.py" --index 2>> "$baseDir\logs\session-errors.log" |
+    python "$baseDir\scripts\packed-retrieve.py" --index 2>> "$baseDir\logs\session-errors.log" |
         Set-Content "$baseDir\packed\INDEX.md" -Encoding UTF8
 } catch {}
 
 try {
-    python3 "$baseDir\scripts\obsidian-sync.py" push 2>> "$baseDir\logs\session-errors.log" | Out-Null
+    python "$baseDir\scripts\obsidian-sync.py" push 2>> "$baseDir\logs\session-errors.log" | Out-Null
 } catch {}
 
 # ═══════════════════════════════════════════
@@ -117,7 +117,7 @@ $qualityScore = [math]::Max(0, [math]::Min(100, $qualityScore))
 $trendFile = "$summaryDir\quality_trend.jsonl"
 $trendJson = @{ timestamp = (Get-Date -Format "o"); score = $qualityScore; friction = $frictionCount; failures = $failureCount; evolved = $evolved; sedimentation = $localMdUpdated } |
     ConvertTo-Json -Compress
-try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert quality_trend "" $trendJson 2>$null | Out-Null } catch {
+try { python "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert quality_trend "" $trendJson 2>$null | Out-Null } catch {
     $trendJson | Add-Content $trendFile -Encoding UTF8
 }
 

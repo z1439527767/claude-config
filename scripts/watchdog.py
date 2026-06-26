@@ -110,10 +110,10 @@ def log_event(event_type, target, detail=""):
 def run_action(action, target_label):
     """Run the appropriate action for a changed target."""
     actions = {
-        "verify": ["python3", str(SCRIPTS / "verify-all.py"), "--quick"],
-        "verify_refs": ["python3", str(SCRIPTS / "verify-all.py"), "--quick"],
-        "audit_rules": ["python3", str(SCRIPTS / "rule-auditor.py")],
-        "syntax_check": ["python3", str(SCRIPTS / "verify-all.py"), "--quick"],
+        "verify": ["python", str(SCRIPTS / "verify-all.py"), "--quick"],
+        "verify_refs": ["python", str(SCRIPTS / "verify-all.py"), "--quick"],
+        "audit_rules": ["python", str(SCRIPTS / "rule-auditor.py")],
+        "syntax_check": ["python", str(SCRIPTS / "verify-all.py"), "--quick"],
     }
 
     if action not in actions:

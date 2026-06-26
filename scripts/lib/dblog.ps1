@@ -14,9 +14,9 @@ function Write-DbLog {
     )
     try {
         if ($LogKey) {
-            $result = python3 $script:DbAdapter insert $Source $LogKey $Data 2>$null
+            $result = python $script:DbAdapter insert $Source $LogKey $Data 2>$null
         } else {
-            $result = python3 $script:DbAdapter insert $Source $Data 2>$null
+            $result = python $script:DbAdapter insert $Source $Data 2>$null
         }
         if ($LASTEXITCODE -ne 0) {
             # Silently fall back — JSONL is still the primary write path
@@ -41,7 +41,7 @@ function Read-DbLog {
         if ($Key) { $args += "--key"; $args += $Key }
         if ($AsJson) { $args += "--json" }
 
-        $result = python3 $script:DbAdapter @args 2>$null
+        $result = python $script:DbAdapter @args 2>$null
         if ($LASTEXITCODE -eq 0 -and $result) {
             return $result | ConvertFrom-Json
         }
@@ -59,13 +59,13 @@ function Remove-DbLog {
         [int]$Keep
     )
     try {
-        python3 $script:DbAdapter rotate $Source --keep $Keep 2>$null | Out-Null
+        python $script:DbAdapter rotate $Source --keep $Keep 2>$null | Out-Null
     } catch {}
 }
 
 function Get-DbStats {
     try {
-        $result = python3 $script:DbAdapter stats 2>$null
+        $result = python $script:DbAdapter stats 2>$null
         if ($LASTEXITCODE -eq 0 -and $result) { return $result }
     } catch {}
     return "DB unavailable"

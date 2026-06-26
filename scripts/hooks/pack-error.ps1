@@ -15,5 +15,5 @@ Root cause: TBD — investigate
 Fix: TBD
 "@
 
-$packInput | python3 "$env:USERPROFILE\.claude\scripts\data-pack.py" --type error --source "hook/$toolName" 2>$null
+$packInput | python "$env:USERPROFILE\.claude\scripts\data-pack.py" --type error --source "hook/$toolName" 2>$null
 exit 0

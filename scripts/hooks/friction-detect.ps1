@@ -51,7 +51,7 @@ $event = @{
 } | ConvertTo-Json -Compress
 
 $logFile = Join-Path $frictionDir "events.jsonl"
-try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert "friction/events" "" $event 2>$null | Out-Null } catch {
+try { python "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert "friction/events" "" $event 2>$null | Out-Null } catch {
     Add-Content -Path $logFile -Value $event -Encoding UTF8
 }
 

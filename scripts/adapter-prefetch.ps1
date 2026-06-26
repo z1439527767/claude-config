@@ -23,7 +23,7 @@ $result = @{
 # ── Health (fast, always) ──
 if (-not $Keys -or $Keys -match "health") {
     try {
-        $healthOut = python3 "$baseDir\scripts\health-check.py" 2>$null
+        $healthOut = python "$baseDir\scripts\health-check.py" 2>$null
         $result.health = $healthOut -join " | "
     } catch { $result.health = "unavailable" }
 }

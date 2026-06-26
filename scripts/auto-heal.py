@@ -51,7 +51,7 @@ def run_verify():
     """Run verify-all and return parsed results."""
     try:
         result = subprocess.run(
-            ["python3", str(SCRIPTS / "verify-all.py"), "--json"],
+            ["python", str(SCRIPTS / "verify-all.py"), "--json"],
             capture_output=True, text=True, timeout=120,
             encoding='utf-8', errors='replace'
         )

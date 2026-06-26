@@ -17,7 +17,7 @@ $entry = @{
     agent_id    = $agentId.Substring(0, [Math]::Min(16, $agentId.Length))
 } | ConvertTo-Json -Compress
 
-try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert subagent_spawns "" $entry 2>$null | Out-Null } catch {
+try { python "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert subagent_spawns "" $entry 2>$null | Out-Null } catch {
     Add-Content "$logDir\subagent_spawns.jsonl" -Value $entry -Encoding UTF8
 }
 

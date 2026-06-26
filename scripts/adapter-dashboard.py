@@ -67,7 +67,7 @@ def run_py(path: str, args: str = "") -> str:
     """Run a Python script and return stdout."""
     try:
         result = subprocess.run(
-            ["python3", path] + (args.split() if args else []),
+            ["python", path] + (args.split() if args else []),
             capture_output=True, text=True, timeout=10, cwd=str(BASE_DIR)
         )
         return result.stdout.strip() or "(no output)"
