@@ -27,7 +27,9 @@ try {
         foreach ($group in $currentSettings.hooks.$eventName) {
             foreach ($h in $group.hooks) {
                 if ($h.command -match '([^\\"]+\.ps1)') {
-                    if (-not (Test-Path (Join-Path "$env:USERPROFILE\.claude\scripts\hooks" $Matches[1]))) {
+                    $spHook = Join-Path "$env:USERPROFILE\.claude\scripts\hooks" $Matches[1]
+                    $spRoot = Join-Path "$env:USERPROFILE\.claude\scripts" $Matches[1]
+                    if (-not (Test-Path $spHook) -and -not (Test-Path $spRoot)) {
                         $verifyOk = $false; $verifyErrors += "$eventName → $($Matches[1]) not found"
                     }
                 }
