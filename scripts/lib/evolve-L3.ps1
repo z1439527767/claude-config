@@ -39,5 +39,12 @@ foreach ($hookN in $metrics.Keys) {
 }
 
 if ($settingsModified) {
-    $settings | ConvertTo-Json -Depth 5 | Set-Content $settingsJson -Encoding UTF8
+    # Atomic write: temp → rename (production rule #1 — settings.json corruption prevention)
+    $tmpJson = "$settingsJson.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+    try {
+        $settings | ConvertTo-Json -Depth 5 | Set-Content $tmpJson -Encoding UTF8
+        Move-Item -Force $tmpJson $settingsJson
+    } catch {
+        if (Test-Path $tmpJson) { Remove-Item $tmpJson -Force -ErrorAction SilentlyContinue }
+    }
 }

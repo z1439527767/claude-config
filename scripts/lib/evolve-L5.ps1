@@ -116,10 +116,17 @@ if (Test-Path $ruleTrackFile) {
                 $claudeContent = $claudeContent -replace [regex]::Escape("- $rule`n"), ""
                 $claudeContent = $claudeContent -replace [regex]::Escape("- $rule"), ""
             }
-            Set-Content $claudeMd -Value $claudeContent -Encoding UTF8 -NoNewline
-            $script:applied += "L5e: pruned $($toRemove.Count) ineffective rule(s) from CLAUDE.md"
+            # Atomic write: temp → rename
+            $tmpMd = "$claudeMd.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+            try {
+                Set-Content $tmpMd -Value $claudeContent -Encoding UTF8 -NoNewline
+                Move-Item -Force $tmpMd $claudeMd
+                $script:applied += "L5e: pruned $($toRemove.Count) ineffective rule(s) from CLAUDE.md"
+            } catch { if (Test-Path $tmpMd) { Remove-Item $tmpMd -Force -ErrorAction SilentlyContinue } }
         }
-        $ruleTrack | ConvertTo-Json | Set-Content $ruleTrackFile -Encoding UTF8
+        # Atomic write state file
+        $tmpRt = "$ruleTrackFile.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+        try { $ruleTrack | ConvertTo-Json | Set-Content $tmpRt -Encoding UTF8; Move-Item -Force $tmpRt $ruleTrackFile } catch { if (Test-Path $tmpRt) { Remove-Item $tmpRt -Force -ErrorAction SilentlyContinue } }
     } catch {}
 }
 

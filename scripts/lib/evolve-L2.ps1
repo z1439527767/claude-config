@@ -22,25 +22,21 @@ try {
         if ($ach -match "clean|清理|删") { $patterns['cleanup'] = [int]$patterns['cleanup'] + 1 }
     }
 
-    $principleMap = @{
-        'hook-creation' = "每次新需求 → hook 优先于规则文件。Hook 是确定性执行，规则是建议。"
-        'bug-fix' = "发现 bug → 立即修复 → 加 hook 防止复发 → 记录到知识图谱。不让同一个 bug 犯两次。"
-        'evolution' = "进化是循环：检测 → 分析 → 应用 → 验证 → 沉淀。每步可审计。"
-        'cleanup' = "清理时删多余文件，不建新系统。简单 = 少，不是多。"
-    }
-
+    # Emit signal for LLM to synthesize (honest architecture: hook detects, LLM synthesizes)
+    $signals = @()
     foreach ($pk in @('hook-creation','bug-fix','evolution','cleanup')) {
         if ([int]$patterns[$pk] -ge 3) {
-            $principle = $principleMap[$pk]
-            $agentsContent = Get-Content $agentsMd -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-            if ($principle -and $agentsContent -notmatch [regex]::Escape(($principle -split '。')[0])) {
-                "`n$principle" | Add-Content $agentsMd -Encoding UTF8
-                $script:applied += "L2: AGENTS.md + '$pk' 原则 (x$($patterns[$pk]))"
-                $patterns[$pk] = 0
-            }
+            $signals += "L2_SIGNAL: $pk ($($patterns[$pk]) patterns) — distill into AGENTS.md principle"
+            $patterns[$pk] = 0  # reset counter after signaling
         }
     }
-    $patterns | ConvertTo-Json | Set-Content $patternFile -Encoding UTF8
+    if ($signals.Count -gt 0) {
+        $script:applied += ($signals -join ' | ')
+    }
+
+    # Atomic write for pattern state
+    $tmpPf = "$patternFile.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+    try { $patterns | ConvertTo-Json | Set-Content $tmpPf -Encoding UTF8; Move-Item -Force $tmpPf $patternFile } catch { if (Test-Path $tmpPf) { Remove-Item $tmpPf -Force -ErrorAction SilentlyContinue } }
 
     $claudeLines = (Get-Content $claudeMd -ErrorAction SilentlyContinue | Measure-Object -Line).Lines
     if ($claudeLines -gt 80) {

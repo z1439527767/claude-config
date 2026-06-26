@@ -105,5 +105,12 @@ for ($i = $claudeLines.Count - 1; $i -ge 0; $i--) {
     }
 }
 if (-not $inserted) { $claudeLines += "- $newRule" }
-$claudeLines -join "`n" | Set-Content $claudeMd -Encoding UTF8 -NoNewline
-$script:applied += "L1: CLAUDE.md + '$newRule' (信号: '$signalName' x$($topSignal.Value), ${sources} sources)"
+# Atomic write: temp → rename (production rule #1)
+$tmpMd = "$claudeMd.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+try {
+    ($claudeLines -join "`n") | Set-Content $tmpMd -Encoding UTF8 -NoNewline
+    Move-Item -Force $tmpMd $claudeMd
+    $script:applied += "L1: CLAUDE.md + '$newRule' (信号: '$signalName' x$($topSignal.Value), ${sources} sources)"
+} catch {
+    if (Test-Path $tmpMd) { Remove-Item $tmpMd -Force -ErrorAction SilentlyContinue }
+}
