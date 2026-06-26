@@ -241,7 +241,7 @@
           },
           {
             "type": "command",
-            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\sync-brain.ps1\"",
+            "command": "pwsh -ExecutionPolicy Bypass -File \"C:\\Users\\z1439\\.claude\\scripts\\sync-brain.ps1\" -Fix",
             "timeout": 2
           }
         ]

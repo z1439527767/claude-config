@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 @.claude/rules/compact.md  ← 上下文再长也不能忘的 8 条
+@.claude/rules/thinking-mode.md  ← 全面·发散·自主·做一步想三步
 
 ## 0. 核心 — Ralph Loop 永不停
 自治、不撒谎、干实事。**不等用户、不等 hook、不等 cron。**
