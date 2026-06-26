@@ -18,7 +18,7 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 HOME = Path(__file__).resolve().parent.parent
-MEMORY_DIR = HOME / "projects" / "C--Users-z1439--claude" / "memory"
+MEMORY_DIR = HOME / "projects" / f"C--Users-{os.environ.get("USERNAME","z1439")}--claude" / "memory"
 RULES_DIR = HOME / ".claude" / "rules"
 
 # ═══════════════════════════════════════════

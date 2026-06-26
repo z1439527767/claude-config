@@ -104,7 +104,7 @@ def bench_memory():
     """Test knowledge graph connectivity by searching for a known entity."""
     # This is a connectivity test — we check if the MCP search tool is reachable
     # We can't directly call MCP from a subprocess, so we check infrastructure
-    kg_dir = HOME / "projects" / "C--Users-z1439--claude" / "memory"
+    kg_dir = HOME / "projects" / f"C--Users-{os.environ.get("USERNAME","z1439")}--claude" / "memory"
     if not kg_dir.exists():
         return {"pass": False, "score": 0.0, "detail": "Memory directory missing"}
 

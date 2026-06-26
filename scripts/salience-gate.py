@@ -27,7 +27,7 @@ if sys.stdout.encoding != 'utf-8':
 HOME = Path(os.environ.get('USERPROFILE', os.path.expanduser('~')))
 CLAUDE = HOME / '.claude'
 GATE_STATE = CLAUDE / '.claude' / 'salience_state.json'
-MEMORY_DIR = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'memory'
+MEMORY_DIR = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
 BLACKBOARD = CLAUDE / 'blackboard' / 'salience'
 BLACKBOARD.mkdir(parents=True, exist_ok=True)
 

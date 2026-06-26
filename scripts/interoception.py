@@ -87,7 +87,7 @@ def sense_token_pressure():
         total = sum(f.stat().st_size for f in rules_dir.glob("*.md"))
         pressure += min(0.30, total / 80000)
 
-    mem_index = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'memory' / 'MEMORY.md'
+    mem_index = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory' / 'MEMORY.md'
     if mem_index.exists():
         pressure += min(0.15, mem_index.stat().st_size / 20000)
 

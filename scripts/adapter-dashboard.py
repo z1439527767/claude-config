@@ -137,7 +137,7 @@ def main():
 
     # ── Layer 3: Memory ──
     print(hdr("▸ L3 MEMORY"))
-    mem_dir = BASE_DIR / "projects" / "C--Users-z1439--claude" / "memory"
+    mem_dir = BASE_DIR / "projects" / f"C--Users-{os.environ.get("USERNAME","z1439")}--claude" / "memory"
     mem_files = get_file_count(mem_dir, "*.md") - 1  # exclude MEMORY.md itself
     mem_index = mem_dir / "MEMORY.md"
     indexed = 0

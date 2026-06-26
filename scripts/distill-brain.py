@@ -27,7 +27,7 @@ if sys.platform == "win32":
 HOME = Path(__file__).resolve().parent.parent
 MODEL_DIR = Path(os.environ.get("RALPH_MODEL_DIR", r"C:\Users\z1439\OneDrive\Desktop\模型"))
 RULES_DIR = HOME / ".claude" / "rules"
-MEMORY_DIR = HOME / "projects" / "C--Users-z1439--claude" / "memory"
+MEMORY_DIR = HOME / "projects" / f"C--Users-{os.environ.get("USERNAME","z1439")}--claude" / "memory"
 SCRIPTS_DIR = HOME / "scripts"
 HOOKS_DIR = SCRIPTS_DIR / "hooks"
 LIB_DIR = SCRIPTS_DIR / "lib"

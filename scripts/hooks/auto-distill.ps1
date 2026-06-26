@@ -5,6 +5,9 @@ param()
 $ErrorActionPreference = "Continue"
 $perfHookName = "auto-distill"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "auto-distill" -EntityName "event-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-event" -Observations @("auto-distill.ps1 executed") -Priority "low"
 $memDir = Get-ChildItem "$env:USERPROFILE\.claude\projects" -Directory -ErrorAction SilentlyContinue |
     ForEach-Object { Join-Path $_.FullName "memory" } |
     Where-Object { Test-Path $_ } |

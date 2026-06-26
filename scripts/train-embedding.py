@@ -22,7 +22,7 @@ HOME = Path(__file__).resolve().parent.parent
 MODEL_DIR = Path(os.environ.get("RALPH_MODEL_DIR", r"C:\Users\z1439\OneDrive\Desktop\模型"))
 OUTPUT_DIR = MODEL_DIR / "ralph-bge-v1"
 
-MEMORY_DIR = HOME / "projects" / "C--Users-z1439--claude" / "memory"
+MEMORY_DIR = HOME / "projects" / f"C--Users-{os.environ.get("USERNAME","z1439")}--claude" / "memory"
 RULES_DIR = HOME / ".claude" / "rules"
 SCRIPTS_DIR = HOME / "scripts"
 

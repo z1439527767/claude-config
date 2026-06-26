@@ -8,6 +8,9 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "auto-verify"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "auto-verify" -EntityName "event-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-event" -Observations @("auto-verify.ps1 executed") -Priority "low"
 if ($tool_name -notin @("Edit", "Write")) { exit 0 }
 
 try {

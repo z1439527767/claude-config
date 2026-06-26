@@ -24,7 +24,7 @@ if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 HOME = Path(os.environ.get('USERPROFILE', os.path.expanduser('~')))
-MEMORY_DIR = HOME / '.claude' / 'projects' / 'C--Users-z1439--claude' / 'memory'
+MEMORY_DIR = HOME / '.claude' / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
 MEMORY_INDEX = MEMORY_DIR / 'MEMORY.md'
 STATE_FILE = HOME / '.claude' / '.claude' / 'memory_scores.json'
 

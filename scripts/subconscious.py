@@ -27,7 +27,7 @@ if sys.stdout.encoding != 'utf-8':
 
 HOME = Path(os.environ.get('USERPROFILE', os.path.expanduser('~')))
 CLAUDE = HOME / '.claude'
-MEMORY_DIR = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'memory'
+MEMORY_DIR = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
 BLACKBOARD = CLAUDE / 'blackboard' / 'subconscious'
 SCRIPTS_DIR = CLAUDE / 'scripts'
 RULES_DIR = CLAUDE / '.claude' / 'rules'

@@ -25,8 +25,8 @@ if sys.stdout.encoding != 'utf-8':
 
 HOME = Path(os.environ.get('USERPROFILE', os.path.expanduser('~')))
 CLAUDE = HOME / '.claude'
-MEMORY_DIR = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'memory'
-DIARY_DIR = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'identity' / 'diary'
+MEMORY_DIR = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
+DIARY_DIR = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'identity' / 'diary'
 
 # ── Narrative Templates ──
 

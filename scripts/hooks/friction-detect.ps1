@@ -6,6 +6,9 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $perfHookName = "friction-detect"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "friction-detect" -EntityName "event-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-event" -Observations @("friction-detect.ps1 executed") -Priority "low"
 if (-not $prompt) { Write-PerfLog 0; exit 0 }
 
 # ── Multi-language correction signals ──

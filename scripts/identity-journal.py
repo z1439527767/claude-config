@@ -27,7 +27,7 @@ if sys.stdout.encoding != 'utf-8':
 
 HOME = Path(os.environ.get('USERPROFILE', os.path.expanduser('~')))
 CLAUDE = HOME / '.claude'
-JOURNAL_DIR = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'identity'
+JOURNAL_DIR = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'identity'
 JOURNAL_DIR.mkdir(parents=True, exist_ok=True)
 
 IDENTITY_FILE = JOURNAL_DIR / 'identity.json'
@@ -139,7 +139,7 @@ def update_capabilities(identity):
     """Refresh capability counts from filesystem."""
     scripts_dir = CLAUDE / 'scripts'
     rules_dir = CLAUDE / '.claude' / 'rules'
-    memory_dir = CLAUDE / 'projects' / 'C--Users-z1439--claude' / 'memory'
+    memory_dir = CLAUDE / 'projects' / f'C--Users-{os.environ.get("USERNAME","z1439")}--claude' / 'memory'
 
     caps = identity["capabilities"]
     old_tools = caps.get("tools", 0)

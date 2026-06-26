@@ -4,6 +4,9 @@
 param(
     [ValidateSet("record_success","record_failure","check","reset","status")]
     [string]$Action = "check",
+# Feed KG signal (hook→brain bridge)
+. "$env:USERPROFILE\.claude\scripts\lib\kg-signal.ps1"
+Write-KgSignal -Source "circuit-breaker" -EntityName "event-$(Get-Date -Format 'yyyyMMdd')" -EntityType "hook-event" -Observations @("circuit-breaker.ps1 executed") -Priority "low"
     [int]$FailureThreshold = 5,
     [int]$SuccessThreshold = 3,
     [int]$WindowSeconds = 300,
