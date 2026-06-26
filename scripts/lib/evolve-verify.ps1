@@ -28,8 +28,9 @@ try {
             foreach ($h in $group.hooks) {
                 if ($h.command -match '([^\\"]+\.ps1)') {
                     $spHook = Join-Path "$env:USERPROFILE\.claude\scripts\hooks" $Matches[1]
+                    $spLib  = Join-Path "$env:USERPROFILE\.claude\scripts\lib" $Matches[1]
                     $spRoot = Join-Path "$env:USERPROFILE\.claude\scripts" $Matches[1]
-                    if (-not (Test-Path $spHook) -and -not (Test-Path $spRoot)) {
+                    if (-not (Test-Path $spHook) -and -not (Test-Path $spLib) -and -not (Test-Path $spRoot)) {
                         $verifyOk = $false; $verifyErrors += "$eventName → $($Matches[1]) not found"
                     }
                 }
