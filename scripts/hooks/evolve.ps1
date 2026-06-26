@@ -36,6 +36,7 @@ if (-not $script:canEvolve) {
 . "$libDir\evolve-L1.ps1"
 . "$libDir\evolve-L2.ps1"
 . "$libDir\evolve-L3.ps1"
+. "$libDir\evolve-L4.ps1"
 . "$libDir\evolve-L5.ps1"
 
 # ── Verify & rollback ──
