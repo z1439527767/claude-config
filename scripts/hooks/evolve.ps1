@@ -32,7 +32,7 @@ $evolveLog = "$env:USERPROFILE\.claude\.claude\evolution_log.jsonl"
 if ($allChanges.Count -gt 0) {
     $event = @{ timestamp = (Get-Date -Format "o"); type = "evolution"; changes = $allChanges }
     $eventJson = $event | ConvertTo-Json -Compress
-    try { python3 "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert evolution_log "" $eventJson 2>$null | Out-Null } catch {
+    try { python "$env:USERPROFILE\.claude\scripts\adapter-db.py" insert evolution_log "" $eventJson 2>$null | Out-Null } catch {
         $eventJson | Add-Content $evolveLog -Encoding UTF8
     }
 

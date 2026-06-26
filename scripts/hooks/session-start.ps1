@@ -84,7 +84,7 @@ $injectors = @(
 )
 $logFile = "$baseDir\logs\session-errors.log"
 $results = $injectors | ForEach-Object -Parallel {
-    $output = python3 "$using:baseDir\scripts\$($_.script)" --inject 2>> "$using:logFile"
+    $output = python "$using:baseDir\scripts\$($_.script)" --inject 2>> "$using:logFile"
     if ($LASTEXITCODE -eq 0 -and $output) {
         @{key=$_.key; text=$output}
     } else { $null }

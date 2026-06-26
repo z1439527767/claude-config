@@ -135,7 +135,16 @@ if days_since_access >= 60: score = score * 0.5
 
 Tags: [fresh] >= 0.8 / [aging] >= 0.5 / [stale] >= 0.3 / [expired] under 0.3
 '@
-Set-Content $memIndex -Value $newContent -Encoding UTF8
+# Atomic write: temp → rename to prevent corruption on crash
+$tmpFile = "$memIndex.tmp.$([Guid]::NewGuid().ToString('N').Substring(0,8))"
+try {
+    Set-Content $tmpFile -Value $newContent -Encoding UTF8
+    Move-Item -Force $tmpFile $memIndex
+} catch {
+    if (Test-Path $tmpFile) { Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue }
+    Write-Output "memory-score: FAILED to write MEMORY.md: $_"
+    Write-PerfLog 2; exit 2
+}
 
 Write-PerfLog 0
 Write-Output "memory-score: $($entries.Count) entries scored"
