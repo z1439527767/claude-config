@@ -55,9 +55,29 @@ if (Test-Path $claudeMd) {
 if (Test-Path $settingsPath) {
     try {
         $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
+
+        # Also discover plugin-based MCPs (Claude Code plugins carry their own .mcp.json)
+        $pluginMcps = @()
+        $pluginsDir = "$HomeDir/.claude/plugins/marketplaces"
+        if (Test-Path $pluginsDir) {
+            $pluginMcps = Get-ChildItem $pluginsDir -Recurse -Filter ".mcp.json" -ErrorAction SilentlyContinue |
+                ForEach-Object {
+                    try {
+                        $pm = Get-Content $_.FullName -Raw | ConvertFrom-Json
+                        $pm.mcpServers | Get-Member -MemberType NoteProperty -ErrorAction SilentlyContinue |
+                            ForEach-Object { $_.Name }
+                    } catch { }
+                } | Sort-Object -Unique
+        }
+
         $mcpServers = $settings.mcpServers | Get-Member -MemberType NoteProperty -ErrorAction SilentlyContinue
-        if (-not $mcpServers) {
-            $issues += "[mcp-drift] No MCP servers in settings.json"
+        if (-not $mcpServers -and -not $pluginMcps) {
+            $issues += "[mcp-drift] No MCP servers in settings.json or plugins"
+        } elseif (-not $mcpServers) {
+            # Only plugin MCPs — this is fine (Claude Code plugin system)
+            if (-not $Quiet) {
+                Write-Output "[sync-brain] MCP: $($pluginMcps.Count) via plugins ($($pluginMcps -join ', '))"
+            }
         } else {
             $mcpNames = $mcpServers | ForEach-Object { $_.Name }
 

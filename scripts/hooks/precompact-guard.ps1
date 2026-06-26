@@ -1,5 +1,6 @@
 # precompact-guard.ps1 — PreCompact: preserve core rules + smart compression hint
 param()
+$ErrorActionPreference = "Continue"
 $perfHookName = "precompact-guard"; . "$env:USERPROFILE\.claude\scripts\lib\perf.ps1"
 $guard = @"
 POST-COMPACT RULES STILL ACTIVE:
